@@ -15,7 +15,8 @@ IF( NOT SFML_FOUND )
 ENDIF()
 
 target_link_libraries(freebies-game PRIVATE
-                      libs
-	                  ${SFML_LIBRARIES} )
+                      byte_stream
+                      xml_parser
+                      ${SFML_LIBRARIES} )
 
 target_include_directories(freebies-game PRIVATE ${SFML_INCLUDE_DIR})

@@ -15,7 +15,7 @@ class Event<void(Args...)>
 public:
     using slot_type = std::function<void(Args...)>;
     using slot_container = std::vector<slot_type>;
-	using slot_key = typename slot_container::key_type;
+    using slot_key = size_t;
 
 	template <class C>
 	slot_key connect(C* const object_ptr, void (C::*const method_ptr)(Args...))
@@ -114,7 +114,7 @@ public:
     bool operator==(const Event& s) const
 	{
 		return slots_ == s.slots_;
-	}
+    }
 
     bool operator!=(const Event& s) const
 	{
