@@ -17,6 +17,9 @@ ENDIF()
 target_link_libraries(freebies-game PRIVATE
                       byte_stream
                       xml_parser
+                      resource_mgr
+                      sprite
+                      tweeny
                       ${SFML_LIBRARIES} )
 
 target_include_directories(freebies-game PRIVATE ${SFML_INCLUDE_DIR})
