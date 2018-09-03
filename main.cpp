@@ -1,5 +1,6 @@
 #include <iostream>
 #include "SFML/Graphics.hpp"
+#include <Thor/Resources.hpp>
 
 int main()
 {

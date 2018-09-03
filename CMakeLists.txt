@@ -7,6 +7,10 @@ add_executable(freebies-game "main.cpp")
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};/usr/share/SFML/cmake/Modules/")
 
+add_subdirectory(Thor)
+
+target_include_directories(freebies-game PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/Thor/include")
+
 find_package(SFML 2 COMPONENTS system window graphics audio REQUIRED)
 
 IF( NOT SFML_FOUND )
@@ -15,6 +19,7 @@ ENDIF()
 
 target_link_libraries(freebies-game PRIVATE
                       ${SFML_LIBRARIES}
+                      thor
                       -lstdc++fs)
 
 target_include_directories(freebies-game PRIVATE ${SFML_INCLUDE_DIR})
