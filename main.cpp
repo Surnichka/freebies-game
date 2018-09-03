@@ -1,6 +1,7 @@
 #include <iostream>
 #include "SFML/Graphics.hpp"
 #include <Thor/Resources.hpp>
+#include <Box2D/Box2D.h>
 
 int main()
 {
