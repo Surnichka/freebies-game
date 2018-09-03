@@ -22,4 +22,4 @@ target_link_libraries(freebies-game PRIVATE
                       thor
                       -lstdc++fs)
 
-target_include_directories(freebies-game PRIVATE ${SFML_INCLUDE_DIR})
+target_include_directories(freebies-game PRIVATE ${SFML_INCLUDE_DIR}) 
