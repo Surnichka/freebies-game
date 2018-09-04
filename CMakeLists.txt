@@ -7,9 +7,7 @@ add_executable(freebies-game "main.cpp")
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};/usr/share/SFML/cmake/Modules/")
 
-add_subdirectory(AssetsParser)
 add_subdirectory(Core)
-add_subdirectory(Thor)
 
 target_include_directories(freebies-game PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/Thor/include")
 
@@ -21,9 +19,6 @@ ENDIF()
 
 target_link_libraries(freebies-game PRIVATE
                       ${SFML_LIBRARIES}
-                      thor
-                      AssetsParser
-                      Core
-                      -lstdc++fs)
+                      Core)
 
 target_include_directories(freebies-game PRIVATE ${SFML_INCLUDE_DIR}) 

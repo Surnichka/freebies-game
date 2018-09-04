@@ -2,7 +2,7 @@
 #include <functional>
 #include <math.h>
 
-namespace core
+namespace math
 {
 namespace ease
 {
@@ -41,4 +41,4 @@ double outBounce( double t );
 double inOutBounce( double t );
 
 } //end of ease
-} //end of core
+} //end of math

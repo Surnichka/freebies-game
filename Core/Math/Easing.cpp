@@ -1,6 +1,6 @@
 #include "Easing.h"
 
-namespace core
+namespace math
 {
 namespace ease
 {
@@ -175,4 +175,4 @@ double linear(double t)
 }
 
 } //end of ease
-} //end of core
+} //end of math

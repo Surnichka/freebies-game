@@ -1,41 +1,48 @@
 #pragma once
+#include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/Sprite.hpp>
-#include "../Math/Math.h"
 #include <SFML/Graphics/RenderWindow.hpp>
+
+#include "../Math/Math.h"
 #include "../Timer/Timer.h"
 #include <chrono>
 #include <vector>
 #include <map>
+#include <iostream>
 
 namespace core
 {
 
 enum class ReplayPolicy {OnNew, Always, Never};
 
-class Character
+class Character : public sf::Transformable
 {
 public:
     using Identifier = std::string;
     using SpriteList = std::vector<sf::Sprite>;
     using AnimMap = std::map<std::string, SpriteList>;
 
+    Character();
+    ~Character() = default;
+
+    Character(const Character& other);
+    Character& operator=(const Character& other);
+
+    Character(Character&& other);
+    Character& operator=(Character&& other);
+
     void AddAnimation(const Identifier& id, const SpriteList& frames);
     void Play(const Identifier& id, std::chrono::milliseconds duration, ReplayPolicy replayPolicy = ReplayPolicy::OnNew);
-    void Stop(const std::string& id);
+    void Stop();
+    bool Has(const Identifier& id) const;
 
     bool IsPlaying() const;
     std::string GetActive() const;
 
     void Update(std::chrono::milliseconds dt);
     void Draw(sf::RenderWindow& window);
-
-    void SetPosition(sf::Vector2f pos);
-    void SetScale(sf::Vector2f scale);
-    void SetOrigin(sf::Vector2f origin);
-
-    void Move(sf::Vector2f offset);
-    void Rotate(float degree);
 private:
+    void clear();
     struct AnimInfo
     {
         bool playing = false;
@@ -45,7 +52,5 @@ private:
     };
     AnimMap m_animations;
     AnimInfo m_animInfo;
-
-    sf::Transformable m_transformable;
 };
 }//end of core

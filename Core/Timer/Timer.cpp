@@ -38,6 +38,7 @@ void Timer::Update(std::chrono::milliseconds dt)
         }
 
         m_info.tickElapsed -= m_info.config.tickPeriod;
+        m_info.tickCount++;
     }
 
     if( false == isInfinity() )
@@ -106,6 +107,7 @@ void Timer::clear()
     m_info.delayElapsed = 0ms;
     m_info.durationElapsed = 0ms;
     m_info.tickElapsed = 0ms;
+    m_info.tickCount = 0;
 }
 
 } //end of core

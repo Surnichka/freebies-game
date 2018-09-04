@@ -2,7 +2,7 @@
 #include "Easing.h"
 #include <chrono>
 
-namespace core
+namespace math
 {
     
 ///Get value between range [start, end] - by progress factor (t) - between 0.0 and 1.0
@@ -70,4 +70,4 @@ inline std::chrono::milliseconds RangeMap(T in,
     return std::chrono::milliseconds(result);
 }
 
-} //end of core
+} //end of math

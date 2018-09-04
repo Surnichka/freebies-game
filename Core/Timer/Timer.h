@@ -26,6 +26,7 @@ public:
     struct Info
     {
         Config config;
+        size_t tickCount = 0;
         std::chrono::milliseconds delayElapsed = 0ms;
         std::chrono::milliseconds tickElapsed = 0ms;
         std::chrono::milliseconds durationElapsed = 0ms;

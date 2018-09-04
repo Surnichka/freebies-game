@@ -1,55 +1,35 @@
+#include "SFML/Graphics/RenderWindow.hpp"
+#include "SFML/Window/Event.hpp"
 #include <iostream>
-#include "SFML/Graphics.hpp"
-#include <Thor/Resources.hpp>
-#include <Box2D/Box2D.h>
-#include "AssetsParser/CharacterParser.h"
-#include "Core/Characters/Character.h"
+#include "Core/Application/Application.h"
+#include "Core/Characters/CharacterCreator.h"
 
 int main()
 {
-    CharacterParser cp;
-    cp.Parse();
-
-    std::map<std::string, std::vector<sf::Texture>> animTextures;
-    for(auto& p : cp.charactersKeys)
+    static const std::vector<std::string> testCharacters =
     {
-        if((p[1] == std::string("attack")))
-        {
-            std::cout << p[2] << std::endl;
-        }
-    }
-
-    for(const auto& keys : cp.charactersKeys)
+        "knight", "cute_girl"
+    };
+    static const std::vector<std::string> testAnimations =
     {
-        const auto& animId = keys[1];
-        const auto& path = keys[2];
-        auto& textureList = animTextures[animId];
-        textureList.push_back(sf::Texture());
-        textureList.back().loadFromFile(path);
-    }
+        "idle", "walk", "run", "jump", "attack", "jump_attack", "die"
+    };
+    auto currentCharacter = testCharacters.cbegin();
+    auto currentAnimId = testAnimations.cbegin();
 
-    core::Character knight;
-    for(const auto& p : animTextures)
-    {
-        const auto& animId = p.first;
-        const auto& textureList = p.second;
-        std::vector<sf::Sprite> sprites(textureList.size());
-        for(size_t i = 0; i < sprites.size(); i++)
-        {
-            sprites[i].setTexture(textureList[i]);
-        }
+    auto& app = Application::Get();
+    app.Init();
 
-        knight.AddAnimation(animId, sprites);
-    }
-    knight.SetScale({0.25f, 0.25f});
+    core::Character character;
 
     sf::RenderWindow window(sf::VideoMode(1400, 1024), "FREEBIES");
     window.setFramerateLimit(60);
 
-    sf::Event event;
     while (window.isOpen())
     {
-        window.clear(sf::Color::White);
+        window.clear(sf::Color(127, 174, 169));
+
+        sf::Event event;
         while (window.pollEvent(event))
         {
             if(event.type == sf::Event::Closed)
@@ -58,18 +38,37 @@ int main()
             }
             if(event.type == sf::Event::KeyPressed)
             {
+                if(event.key.code == sf::Keyboard::T)
+                {
+                    currentAnimId++;
+                    if(currentAnimId == testAnimations.cend())
+                    {
+                        currentAnimId = testAnimations.cbegin();
+                    }
+                    std::cout << "Current animation :" << (*currentAnimId) << std::endl;
+                }
+                else if(event.key.code == sf::Keyboard::R)
+                {
+                    currentCharacter++;
+                    if(currentCharacter == testCharacters.cend())
+                    {
+                        currentCharacter = testCharacters.cbegin();
+                    }
+                    character = app.characterCreator->Create((*currentCharacter));
 
+                    character.setScale({0.25f, 0.25f});
+                    character.setPosition({300, 300});
+                }
             }
             if(event.type == sf::Event::MouseMoved)
             {
-
             }
         }
-        knight.Play("idle", 600ms, core::ReplayPolicy::Never);
 
+        character.Play((*currentAnimId), 700ms, core::ReplayPolicy::OnNew);
 
-        knight.Update(15ms);
-        knight.Draw(window);
+        character.Update(15ms);
+        character.Draw(window);
 
         window.display();
     }
