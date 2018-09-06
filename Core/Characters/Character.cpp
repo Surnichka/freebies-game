@@ -84,7 +84,7 @@ void Character::Play(const Identifier& id, std::chrono::milliseconds duration, R
     m_animInfo.lifetime.Setup(timerConfig);
     m_animInfo.lifetime.OnTick([this](const core::Timer::Info& info)
     {
-        m_animInfo.activeSpriteIndex = info.tickCount;
+        //m_animInfo.activeSpriteIndex = info.tickCount;
     });
     m_animInfo.lifetime.OnTimerEnd([this]()
     {
@@ -114,11 +114,11 @@ Character::Identifier Character::GetActive() const
     return m_animInfo.activeAnim->first;
 }
 
-void Character::Update(std::chrono::milliseconds dt)
+void Character::Update()
 {
     if(m_animInfo.activeAnim != m_animations.end())
     {
-        m_animInfo.lifetime.Update(dt);
+        m_animInfo.lifetime.Update();
 
         auto& sprite = m_animInfo.activeAnim->second[m_animInfo.activeSpriteIndex];
         sprite.setPosition(getPosition());

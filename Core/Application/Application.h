@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <chrono>
 
 namespace core
 {
@@ -19,7 +20,7 @@ public:
     static Application& Get();
 
 public:
-
+    std::chrono::milliseconds frameTime;
     std::unique_ptr<core::Resources> resources;
     std::unique_ptr<core::CharacterCreator> characterCreator;
 

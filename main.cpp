@@ -21,6 +21,7 @@ int main()
     app.Init();
 
     core::Character character;
+    core::Character2 character2 = app.characterCreator->Create2("cute_girl");
 
     sf::RenderWindow window(sf::VideoMode(1400, 1024), "FREEBIES");
     window.setFramerateLimit(60);
@@ -59,16 +60,23 @@ int main()
                     character.setScale({0.25f, 0.25f});
                     character.setPosition({300, 300});
                 }
+                else if(event.key.code == sf::Keyboard::Q)
+                {
+                    character2.Play("idle", 500ms);
+                }
             }
             if(event.type == sf::Event::MouseMoved)
             {
             }
         }
-
+        app.frameTime = 15ms; //calculate delta time
         character.Play((*currentAnimId), 700ms, core::ReplayPolicy::OnNew);
 
-        character.Update(15ms);
+        character.Update();
         character.Draw(window);
+
+        character2.Update();
+        character2.Draw(window);
 
         window.display();
     }

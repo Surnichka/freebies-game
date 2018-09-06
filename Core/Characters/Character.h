@@ -39,9 +39,12 @@ public:
     bool IsPlaying() const;
     std::string GetActive() const;
 
-    void Update(std::chrono::milliseconds dt);
+    void Update();
     void Draw(sf::RenderWindow& window);
 private:
+    friend class ICharacterAnimation;
+    sf::Sprite m_activeSprite;
+
     void clear();
     struct AnimInfo
     {

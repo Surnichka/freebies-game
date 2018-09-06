@@ -26,7 +26,6 @@ public:
     struct Info
     {
         Config config;
-        size_t tickCount = 0;
         std::chrono::milliseconds delayElapsed = 0ms;
         std::chrono::milliseconds tickElapsed = 0ms;
         std::chrono::milliseconds durationElapsed = 0ms;
@@ -37,7 +36,7 @@ public:
     using OnTimerEndCB = std::function<void()>;
 
     void Setup(const Timer::Config& config);
-    void Update(std::chrono::milliseconds dt);
+    void Update();
 
     void OnTick(const OnTickCB& onTick);
     void OnTick(const OnTickInfoCB& onTickInfo);
@@ -48,13 +47,15 @@ public:
     void Stop();
 
     bool IsRunning() const;
+    bool IsExpired() const;
+    const Info& GetInfo() const;
 private:
     bool isInfinity() const;
     void clear();
 
 private:
     bool m_running = false;
-
+    bool m_expired = false;
     Info m_info;
 
     OnTickCB m_onTick;
