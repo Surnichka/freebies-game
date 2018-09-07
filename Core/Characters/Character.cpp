@@ -74,17 +74,13 @@ void Character::Play(const Identifier& id, std::chrono::milliseconds duration, R
     m_animInfo.playing = true;
     m_animInfo.activeSpriteIndex = 0;
 
-    auto animFramesCount = m_animInfo.activeAnim->second.size();
-    auto tickPeriod = static_cast<size_t>(duration.count()) / animFramesCount;
-
-    core::Timer::Config timerConfig;
-    timerConfig.tickPeriod = std::chrono::milliseconds(tickPeriod);
-    timerConfig.duration = duration;
-
-    m_animInfo.lifetime.Setup(timerConfig);
+    m_animInfo.lifetime.Setup(core::Timer::Config(duration));
     m_animInfo.lifetime.OnTick([this](const core::Timer::Info& info)
     {
-        //m_animInfo.activeSpriteIndex = info.tickCount;
+        auto animFramesCount = m_animInfo.activeAnim->second.size() - 1;
+        m_animInfo.activeSpriteIndex = math::RangeMap(info.durationElapsed,
+                                                      0ms, info.config.duration,
+                                                      0ul, animFramesCount);
     });
     m_animInfo.lifetime.OnTimerEnd([this]()
     {
