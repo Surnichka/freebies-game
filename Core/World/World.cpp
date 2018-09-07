@@ -1,52 +1,117 @@
 #include "World.h"
-#include "Box2D/Box2D.h"
-#include "../Math/WorldConvertations.h"
+#include "../AssetsParser/MapParser.h"
+#include "../Resources/Resources.h"
+#include "../Application/Application.h"
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/Window/Event.hpp>
 
 namespace core
 {
 
 namespace config
 {
-    const b2Vec2 gravity = {0.0f, -9.8f};
-
-    const constexpr float timeStep = 1.0f / 60.0f;
-    const int32_t velocityIterations = 8;
-    const int32_t positionIterations = 3;
+    const sf::Vector2f gravity = {0.0f, 10.0f};
 }
 
 void World::Init()
 {
-    m_world = std::make_unique<b2World>(config::gravity);
+    MapParser parser;
+    parser.Parse();
+
+    auto windowSize = Application::Get().windowSize;
+    auto mapResources = Application::Get().resources->GetHolder<sf::Texture>("map");
+    {
+        mapResources->Aquire("background", "../freebies-game/Assets/BACKGROUND.png");
+        auto& texture = mapResources->Get("background");
+
+        sf::Vector2f scale((windowSize.x / texture.getSize().x),
+                           (windowSize.y / texture.getSize().y));
+
+        m_background.setTexture(texture);
+        m_background.setScale(scale);
+    }
+
+    const auto& mapGrid = parser.GetMapGrid();
+    float tileWidth = windowSize.x / mapGrid.cbegin()->size();
+    float tileHeight = windowSize.y / mapGrid.size();
+
+    sf::Vector2f posInWorld;
+    for(size_t rowIdx = 0; rowIdx < mapGrid.size(); rowIdx++)
+    {
+        posInWorld.y = tileHeight * rowIdx;
+        for(size_t colIdx = 0; colIdx < mapGrid[rowIdx].size(); colIdx++)
+        {
+            posInWorld.x = tileWidth * colIdx;
+
+            const auto& texturePath = mapGrid[rowIdx][colIdx];
+            if(texturePath.empty())
+            {
+                continue;
+            }
+
+            mapResources->Aquire(texturePath, texturePath);
+            auto& texture = mapResources->Get(texturePath);
+
+            Entity entity;
+
+            sf::Vector2f tileScale = {1.0f, 1.0f};
+            if (texturePath == "../freebies-game/Assets/Box.png")
+            {
+                tileScale = {(tileWidth / texture.getSize().x),
+                             (tileHeight / texture.getSize().y)};
+                entity.name = "box";
+            }
+            else
+            {
+                entity.name = "tree";
+            }
+            entity.setTexture(&texture);
+            entity.setPosition(posInWorld);
+            entity.setScale(tileScale);
+            entity.setBody(entity.getGlobalBounds(), b2BodyType::b2_staticBody);
+
+            m_map.emplace_back(std::move(entity));
+        }
+        posInWorld.x = 0;
+    }
+
+    Entity entity;
+    entity.name = "lqlq";
+    entity.setTexture(&(mapResources->Get("../freebies-game/Assets/Box.png")));
+    entity.setPosition(700, 0);
+    entity.setScale({0.3f, 0.3f});
+    entity.setBody(entity.getGlobalBounds(), b2BodyType::b2_dynamicBody);
+
+    m_map.emplace_back(std::move(entity));
 }
 
 void World::Update()
 {
-    m_world->Step(config::timeStep, config::velocityIterations, config::positionIterations);
+    sf::Vector2f bla;
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) bla.x -= 5.0f;
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) bla.x += 5.0f;
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) bla.y -= 5.0f;
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)) bla.y += 5.0f;
+
+    for(auto& tile : m_map)
+    {
+        if(tile.name == "lqlq")
+        {
+            tile.applyForce(config::gravity);
+//            tile.applyForce(bla);
+        }
+        tile.update(m_map);
+    }
 }
 
-b2Body* World::CreatePolygonBody(const sf::FloatRect &rect, b2BodyType bodyType, Material material)
+void World::Draw(sf::RenderWindow &window)
 {
-    b2BodyDef bodyDef;
-    bodyDef.type = bodyType;
-    bodyDef.position.Set(math::PixelToMeter(rect.left), math::PixelToMeter(rect.top) );
-
-    b2PolygonShape shape;
-    shape.SetAsBox(math::PixelToMeter(rect.width), math::PixelToMeter(rect.height));
-
-    b2FixtureDef fixtureDef;
-    fixtureDef.shape = &shape;
-    fixtureDef.density = material.density;
-    fixtureDef.friction = material.friction;
-    fixtureDef.restitution = material.restitution;
-
-    b2Body* body = m_world->CreateBody(&bodyDef);
-    body->CreateFixture(&fixtureDef);
-    return body;
+    window.draw(m_background);
+    for(const auto& tile : m_map)
+    {
+        window.draw(tile);
+    }
 }
 
-void World::DeleteFromWorld(b2Body *body)
-{
-    m_world->DestroyBody(body);
-}
 
 } //end of core

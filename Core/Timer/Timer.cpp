@@ -15,10 +15,6 @@ void Timer::Update()
     auto dt = Application::Get().frameTime;
     if( false == IsRunning() )
     {
-        if(m_expired)
-        {
-            m_expired = false;
-        }
         return;
     }
 
@@ -51,7 +47,6 @@ void Timer::Update()
         if( m_info.durationElapsed >= m_info.config.duration )
         {
             m_running = false;
-            m_expired = true;
             if(nullptr != m_onTimerEnd)
             {
                 m_onTimerEnd();
@@ -113,11 +108,6 @@ void Timer::clear()
     m_info.delayElapsed = 0ms;
     m_info.durationElapsed = 0ms;
     m_info.tickElapsed = 0ms;
-}
-
-bool Timer::IsExpired() const
-{
-    return m_expired;
 }
 
 const Timer::Info &Timer::GetInfo() const

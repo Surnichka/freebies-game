@@ -1,11 +1,13 @@
 #pragma once
 #include <memory>
 #include <chrono>
+#include <SFML/System/Vector2.hpp>
 
 namespace core
 {
     class Resources;
     class CharacterCreator;
+    class PWorld;
 }
 
 class Application
@@ -20,10 +22,11 @@ public:
     static Application& Get();
 
 public:
+    sf::Vector2f windowSize = {1440, 1024};
     std::chrono::milliseconds frameTime;
     std::unique_ptr<core::Resources> resources;
     std::unique_ptr<core::CharacterCreator> characterCreator;
-
+    std::unique_ptr<core::PWorld> physicWorld;
 private:
     Application() = default;
     ~Application() = default;

@@ -47,15 +47,12 @@ public:
     void Stop();
 
     bool IsRunning() const;
-    bool IsExpired() const;
     const Info& GetInfo() const;
 private:
     bool isInfinity() const;
     void clear();
-
 private:
     bool m_running = false;
-    bool m_expired = false;
     Info m_info;
 
     OnTickCB m_onTick;

@@ -2,6 +2,8 @@
 #include "../Resources/Resources.h"
 #include "../Characters/CharacterCreator.h"
 #include "../AssetsParser/CharacterParser.h"
+#include "../World/PWorld.h"
+#include <Box2D/Box2D.h>
 
 void Application::Init()
 {
@@ -10,7 +12,8 @@ void Application::Init()
     characterCreator = std::make_unique<core::CharacterCreator>();
     characterCreator->Init();
 
-
+    physicWorld = std::make_unique<core::PWorld>();
+    physicWorld->Init();
 }
 
 Application &Application::Get()
