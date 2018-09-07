@@ -2,6 +2,8 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 #include "../Application/Application.h"
 #include "../Math/WorldConvertations.h"
+#include "../Math/RangeMap.h"
+#include "../Math/Math.h"
 #include "../World/PWorld.h"
 #include <cmath>
 
@@ -76,8 +78,14 @@ sf::Color Entity::getColor() const
 void Entity::applyForce(sf::Vector2f force)
 {
     m_velocity += force;
-    m_body->ApplyLinearImpulse({getPosition().x, getPosition().y},
-                                {getPosition().x + force.x, getPosition().y + force.y}, true);
+
+    b2Vec2 vel = m_body->GetLinearVelocity();
+    float dvx = force.x - vel.x;
+    float dvy = force.y - vel.y;
+    float mass = m_body->GetMass();
+    m_body->ApplyLinearImpulse( b2Vec2(mass * dvx,mass * dvy),
+               m_body->GetWorldCenter(), true );
+
 }
 
 void Entity::update(std::vector<Entity>& entities)
@@ -86,6 +94,7 @@ void Entity::update(std::vector<Entity>& entities)
     //resolveCollisions(entities);
     setPosition({math::MeterToPixel(m_body->GetPosition().x),
                  math::MeterToPixel(m_body->GetPosition().y)});
+    setRotation(math::RadiansToDegree(m_body->GetAngle()));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

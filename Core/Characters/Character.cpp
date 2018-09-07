@@ -1,5 +1,5 @@
 #include "Character.h"
-#include "../Math/Math.h"
+#include "../Math/RangeMap.h"
 #include <iostream>
 
 namespace core

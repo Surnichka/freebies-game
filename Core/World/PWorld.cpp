@@ -7,7 +7,7 @@ namespace core
 
 namespace config
 {
-    const b2Vec2 gravity = {0.0f, -9.8f};
+    const b2Vec2 gravity = {0.0f, 9.8f};
 
     const constexpr float timeStep = 1.0f / 60.0f;
     const int32_t velocityIterations = 8;
@@ -31,7 +31,7 @@ b2Body* PWorld::CreatePolygonBody(const sf::FloatRect &rect, b2BodyType bodyType
     bodyDef.position.Set(math::PixelToMeter(rect.left), math::PixelToMeter(rect.top) );
 
     b2PolygonShape shape;
-    shape.SetAsBox(math::PixelToMeter(rect.width), math::PixelToMeter(rect.height));
+    shape.SetAsBox(math::PixelToMeter(rect.width / 2), math::PixelToMeter(rect.height / 2));
 
     b2FixtureDef fixtureDef;
     fixtureDef.shape = &shape;

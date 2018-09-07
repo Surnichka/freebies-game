@@ -2,8 +2,8 @@
 
 namespace math
 {
-    static const constexpr float pixelToMeter = 30.0f;
-    static const constexpr float meterToPixel = 1.0f / pixelToMeter;
+    static const constexpr float pixelToMeter = 1.0f / 30.0f;
+    static const constexpr float meterToPixel = 30.0f;
 
     inline float PixelToMeter(float pixel)
     {

@@ -64,11 +64,23 @@ void World::Init()
             else
             {
                 entity.name = "tree";
+                continue;
             }
             entity.setTexture(&texture);
-            entity.setPosition(posInWorld);
+            entity.setPosition(posInWorld.x + (tileWidth / 2),
+                               posInWorld.y + (tileHeight / 2));
+            entity.setOrigin(tileWidth / 2, tileHeight / 2);
             entity.setScale(tileScale);
-            entity.setBody(entity.getGlobalBounds(), b2BodyType::b2_staticBody);
+            sf::FloatRect box = {entity.getPosition().x,
+                                 entity.getPosition().y,
+                                 entity.getGlobalBounds().width,
+                                 entity.getGlobalBounds().height};
+
+//            if(entity.name == "box")
+            {
+                b2BodyType bType = (rowIdx == mapGrid.size() - 1) ? b2_staticBody : b2_dynamicBody;
+                entity.setBody(box, b2_staticBody);
+            }
 
             m_map.emplace_back(std::move(entity));
         }
@@ -78,9 +90,14 @@ void World::Init()
     Entity entity;
     entity.name = "lqlq";
     entity.setTexture(&(mapResources->Get("../freebies-game/Assets/Box.png")));
-    entity.setPosition(700, 0);
-    entity.setScale({0.3f, 0.3f});
-    entity.setBody(entity.getGlobalBounds(), b2BodyType::b2_dynamicBody);
+    entity.setPosition(640, 0);
+    entity.setOrigin(tileWidth / 2, tileHeight / 2);
+    entity.setScale({0.5f, 0.5f});
+    sf::FloatRect box = {entity.getPosition().x,
+                         entity.getPosition().y,
+                         entity.getGlobalBounds().width,
+                         entity.getGlobalBounds().height};
+    entity.setBody(box, b2BodyType::b2_dynamicBody);
 
     m_map.emplace_back(std::move(entity));
 }
@@ -88,16 +105,16 @@ void World::Init()
 void World::Update()
 {
     sf::Vector2f bla;
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) bla.x -= 5.0f;
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) bla.x += 5.0f;
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) bla.y -= 5.0f;
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)) bla.y += 5.0f;
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) bla.x -= 30.0f;
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) bla.x += 30.0f;
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) bla.y -= 30.0f;
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)) bla.y += 30.0f;
 
     for(auto& tile : m_map)
     {
         if(tile.name == "lqlq")
         {
-            tile.applyForce(config::gravity);
+//            tile.applyForce(config::gravity);
 //            tile.applyForce(bla);
         }
         tile.update(m_map);

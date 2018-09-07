@@ -1,5 +1,5 @@
 #include "FrameAnimation.h"
-#include "../Math/Math.h"
+#include "../Math/RangeMap.h"
 
 namespace core
 {
