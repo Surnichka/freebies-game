@@ -1,59 +1,27 @@
 #pragma once
-#include <SFML/Graphics/RectangleShape.hpp>
-#include <SFML/Graphics/Sprite.hpp>
-#include <SFML/Graphics/RenderWindow.hpp>
-
-#include "../Math/Math.h"
-#include "../Timer/Timer.h"
-#include <chrono>
-#include <vector>
+#include "../Entity/Entity.h"
+#include "IAnimation.h"
 #include <map>
-#include <iostream>
 
 namespace core
 {
 
-enum class ReplayPolicy {OnNew, Always, Never};
-
-class Character : public sf::Transformable
+class Character : public Entity
 {
 public:
-    using Identifier = std::string;
-    using SpriteList = std::vector<sf::Sprite>;
-    using AnimMap = std::map<std::string, SpriteList>;
-
-    Character();
-    ~Character() = default;
-
-    Character(const Character& other);
-    Character& operator=(const Character& other);
-
-    Character(Character&& other);
-    Character& operator=(Character&& other);
-
-    void AddAnimation(const Identifier& id, const SpriteList& frames);
-    void Play(const Identifier& id, std::chrono::milliseconds duration, ReplayPolicy replayPolicy = ReplayPolicy::OnNew);
+    void AddAnimation(const std::string& id, IAnimation::uPtr&& animation);
+    void Play(const std::string& id, std::chrono::milliseconds duration);
     void Stop();
-    bool Has(const Identifier& id) const;
+    bool Has(const std::string& id) const;
 
     bool IsPlaying() const;
     std::string GetActive() const;
 
     void Update();
-    void Draw(sf::RenderWindow& window);
 private:
-    friend class ICharacterAnimation;
-    sf::Sprite m_activeSprite;
-
-    void clear();
-    struct AnimInfo
-    {
-        bool playing = false;
-        Timer lifetime;
-        AnimMap::iterator activeAnim;
-        size_t activeSpriteIndex = 0;
-    };
+    using AnimMap = std::map<std::string, IAnimation::uPtr>;
     AnimMap m_animations;
-    AnimInfo m_animInfo;
+    AnimMap::iterator m_activeAnim = m_animations.end();
 };
-}//end of core
+
+} //end of core

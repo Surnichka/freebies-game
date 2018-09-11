@@ -3,6 +3,7 @@
 #include "../Application/Application.h"
 #include "../Resources/Resources.h"
 #include <SFML/Graphics/Texture.hpp>
+#include "Animations.h"
 
 namespace core
 {
@@ -29,17 +30,18 @@ Character CharacterCreator::Create(const std::string &name)
         const auto& animId = p.first;
         const auto& texturePathList = p.second;
 
-        std::vector<sf::Sprite> frames;
-        frames.reserve(texturePathList.size());
+        std::vector<std::string> textureIds;
+        textureIds.reserve(texturePathList.size());
         for(const auto& path : texturePathList)
         {
             const auto& key = path;
             resources->Aquire(key, path);
-            auto& texture = resources->Get(key);
-            frames.emplace_back(sf::Sprite(texture));
+            textureIds.emplace_back(key);
         }
-        character.AddAnimation(animId, frames);
+        auto frameAnim = std::make_unique<FrameAnimation>(name, std::move(textureIds));
+        character.AddAnimation(animId, std::move(frameAnim));
     }
+    resources->Load();
     return character;
 }
 

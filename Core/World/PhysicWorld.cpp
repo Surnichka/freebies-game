@@ -1,4 +1,4 @@
-#include "PWorld.h"
+#include "PhysicWorld.h"
 #include "Box2D/Box2D.h"
 #include "../Math/WorldConvertations.h"
 
@@ -7,25 +7,26 @@ namespace core
 
 namespace config
 {
-    const b2Vec2 gravity = {0.0f, 9.8f};
-
+    const b2Vec2 gravity = {0.0f, 0.0f};
     const constexpr float timeStep = 1.0f / 60.0f;
     const int32_t velocityIterations = 8;
     const int32_t positionIterations = 3;
 }
 
-void PWorld::Init()
+void PhysicWorld::Init()
 {
     m_world = std::make_unique<b2World>(config::gravity);
 }
 
-void PWorld::Update()
+void PhysicWorld::Update()
 {
     m_world->Step(config::timeStep, config::velocityIterations, config::positionIterations);
 }
 
-b2Body* PWorld::CreatePolygonBody(const sf::FloatRect &rect, b2BodyType bodyType, Material material)
+b2Body* PhysicWorld::CreateBox(const sf::FloatRect &rect, b2BodyType bodyType)
 {
+    Material material = Material::Default;
+
     b2BodyDef bodyDef;
     bodyDef.type = bodyType;
     bodyDef.position.Set(math::PixelToMeter(rect.left), math::PixelToMeter(rect.top) );
@@ -44,9 +45,14 @@ b2Body* PWorld::CreatePolygonBody(const sf::FloatRect &rect, b2BodyType bodyType
     return body;
 }
 
-void PWorld::DeleteFromWorld(b2Body *body)
+void PhysicWorld::RemoveFromWorld(b2Body *body)
 {
     m_world->DestroyBody(body);
+}
+
+sf::Vector2f PhysicWorld::GetGravity() const
+{
+    return {config::gravity.x, config::gravity.y};
 }
 
 } //end of core

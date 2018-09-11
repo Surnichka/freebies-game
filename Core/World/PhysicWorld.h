@@ -8,16 +8,16 @@ class b2World;
 namespace core
 {
 
-class PWorld
+class PhysicWorld
 {
 public:
     void Init();
-
     void Update();
-    b2Body* CreatePolygonBody(const sf::FloatRect& box, b2BodyType bodyType,
-                                core::Material material = core::Material::Air);
 
-    void DeleteFromWorld(b2Body* body);
+    b2Body* CreateBox(const sf::FloatRect& box, b2BodyType bodyType);
+    void RemoveFromWorld(b2Body* body);
+
+    sf::Vector2f GetGravity() const;
 private:
     std::unique_ptr<b2World> m_world;
 };

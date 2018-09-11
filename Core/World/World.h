@@ -7,7 +7,7 @@
 namespace core
 {
 
-class World
+class World2
 {
 public:
     void Init();
@@ -17,6 +17,7 @@ public:
 private:
     sf::Sprite m_background;
     std::vector<Entity> m_map;
+    Entity m_character;
 };
 
 } //end of core

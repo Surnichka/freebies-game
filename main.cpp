@@ -1,32 +1,28 @@
 #include "SFML/Graphics/RenderWindow.hpp"
 #include "SFML/Window/Event.hpp"
-#include <iostream>
+
 #include "Core/Application/Application.h"
 #include "Core/Characters/CharacterCreator.h"
+
+
+
+
 #include "Core/World/World.h"
 #include <Box2D/Box2D.h>
-#include "Core/World/PWorld.h"
+#include "Core/World/PhysicWorld.h"
+#include "Core/Characters/Character.h"
 
 int main()
 {
     auto& app = Application::Get();
     app.Init();
 
-    core::World world;
+    core::World2 world;
     world.Init();
 
-    static const std::vector<std::string> testCharacters =
-    {
-        "knight", "cute_girl"
-    };
-    static const std::vector<std::string> testAnimations =
-    {
-        "idle", "walk", "run", "jump", "attack", "jump_attack", "die"
-    };
-    auto currentCharacter = testCharacters.cbegin();
-    auto currentAnimId = testAnimations.cbegin();
 
-    core::Character character;
+    core::Character character = app.characterCreator->Create("cute_girl");
+    character.SetBody(sf::FloatRect(100, 100, 100, 100), b2_dynamicBody);
 
     sf::RenderWindow window(sf::VideoMode(static_cast<uint32_t>(app.windowSize.x),
                                           static_cast<uint32_t>(app.windowSize.y)),
@@ -48,40 +44,26 @@ int main()
             {
                 if(event.key.code == sf::Keyboard::T)
                 {
-                    currentAnimId++;
-                    if(currentAnimId == testAnimations.cend())
-                    {
-                        currentAnimId = testAnimations.cbegin();
-                    }
-                    std::cout << "Current animation :" << (*currentAnimId) << std::endl;
+                    character.Play("walk", 500ms);
                 }
                 else if(event.key.code == sf::Keyboard::R)
                 {
-                    currentCharacter++;
-                    if(currentCharacter == testCharacters.cend())
-                    {
-                        currentCharacter = testCharacters.cbegin();
-                    }
-                    character = app.characterCreator->Create((*currentCharacter));
-
-                    character.setScale({0.25f, 0.25f});
-                    character.setPosition({300, 300});
+                    character.ApplyForce(sf::Vector2f(10.0f, 0.0f));
                 }
             }
             if(event.type == sf::Event::MouseMoved)
             {
             }
         }
-        app.frameTime = 15ms; //calculate delta time
+        app.frameTime = 15ms;
+
         app.physicWorld->Update();
-
-        character.Play((*currentAnimId), 700ms, core::ReplayPolicy::OnNew);
-
-        character.Update();
-        character.Draw(window);
 
         world.Update();
         world.Draw(window);
+
+        character.Update();
+        character.Draw(window);
 
         window.display();
     }

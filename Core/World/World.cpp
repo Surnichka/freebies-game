@@ -4,6 +4,8 @@
 #include "../Application/Application.h"
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Window/Event.hpp>
+#include "PhysicWorld.h"
+#include "Box2D/Dynamics/b2World.h"
 
 namespace core
 {
@@ -13,7 +15,7 @@ namespace config
     const sf::Vector2f gravity = {0.0f, 10.0f};
 }
 
-void World::Init()
+void World2::Init()
 {
     MapParser parser;
     parser.Parse();
@@ -32,6 +34,7 @@ void World::Init()
     }
 
     const auto& mapGrid = parser.GetMapGrid();
+    m_map.reserve(mapGrid.size() * mapGrid.front().size());
     float tileWidth = windowSize.x / mapGrid.cbegin()->size();
     float tileHeight = windowSize.y / mapGrid.size();
 
@@ -49,85 +52,49 @@ void World::Init()
                 continue;
             }
 
-            mapResources->Aquire(texturePath, texturePath);
-            auto& texture = mapResources->Get(texturePath);
+            mapResources->Aquire("box", texturePath);
 
-            Entity entity;
-
-            sf::Vector2f tileScale = {1.0f, 1.0f};
-            if (texturePath == "../freebies-game/Assets/Box.png")
-            {
-                tileScale = {(tileWidth / texture.getSize().x),
-                             (tileHeight / texture.getSize().y)};
-                entity.name = "box";
-            }
-            else
-            {
-                entity.name = "tree";
-                continue;
-            }
-            entity.setTexture(&texture);
-            entity.setPosition(posInWorld.x + (tileWidth / 2),
-                               posInWorld.y + (tileHeight / 2));
-            entity.setOrigin(tileWidth / 2, tileHeight / 2);
-            entity.setScale(tileScale);
-            sf::FloatRect box = {entity.getPosition().x,
-                                 entity.getPosition().y,
-                                 entity.getGlobalBounds().width,
-                                 entity.getGlobalBounds().height};
-
-//            if(entity.name == "box")
-            {
-                b2BodyType bType = (rowIdx == mapGrid.size() - 1) ? b2_staticBody : b2_dynamicBody;
-                entity.setBody(box, b2_staticBody);
-            }
-
-            m_map.emplace_back(std::move(entity));
+            m_map.emplace_back(Entity());
+            m_map.back().SetBody({posInWorld.x + tileWidth / 2,
+                                  posInWorld.y + tileHeight / 2,
+                                  tileWidth,
+                                  tileHeight},
+                                  b2_staticBody);
+            m_map.back().SetTexture("map", "box");
         }
         posInWorld.x = 0;
     }
 
-    Entity entity;
-    entity.name = "lqlq";
-    entity.setTexture(&(mapResources->Get("../freebies-game/Assets/Box.png")));
-    entity.setPosition(640, 0);
-    entity.setOrigin(tileWidth / 2, tileHeight / 2);
-    entity.setScale({0.5f, 0.5f});
-    sf::FloatRect box = {entity.getPosition().x,
-                         entity.getPosition().y,
-                         entity.getGlobalBounds().width,
-                         entity.getGlobalBounds().height};
-    entity.setBody(box, b2BodyType::b2_dynamicBody);
-
-    m_map.emplace_back(std::move(entity));
+    m_character.SetBody({700, 100, 50, 50}, b2_dynamicBody);
+    m_character.SetTexture("map", "box");
 }
 
-void World::Update()
+void World2::Update()
 {
     sf::Vector2f bla;
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) bla.x -= 30.0f;
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) bla.x += 30.0f;
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) bla.y -= 30.0f;
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)) bla.y += 30.0f;
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) bla.x -= 10.0f;
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) bla.x += 10.0f;
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) bla.y -= 10.0f;
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)) bla.y += 10.0f;
+
+//    m_character.ApplyForce({gravity.x, gravity.y});
+    m_character.ApplyForce(bla);
 
     for(auto& tile : m_map)
     {
-        if(tile.name == "lqlq")
-        {
-//            tile.applyForce(config::gravity);
-//            tile.applyForce(bla);
-        }
-        tile.update(m_map);
+        tile.Update();
     }
+    m_character.Update();
 }
 
-void World::Draw(sf::RenderWindow &window)
+void World2::Draw(sf::RenderWindow &window)
 {
     window.draw(m_background);
     for(const auto& tile : m_map)
     {
-        window.draw(tile);
+        tile.Draw(window);
     }
+    m_character.Draw(window);
 }
 
 

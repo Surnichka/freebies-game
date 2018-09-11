@@ -7,7 +7,7 @@ namespace core
 {
     class Resources;
     class CharacterCreator;
-    class PWorld;
+    class PhysicWorld;
 }
 
 class Application
@@ -26,7 +26,7 @@ public:
     std::chrono::milliseconds frameTime;
     std::unique_ptr<core::Resources> resources;
     std::unique_ptr<core::CharacterCreator> characterCreator;
-    std::unique_ptr<core::PWorld> physicWorld;
+    std::unique_ptr<core::PhysicWorld> physicWorld;
 private:
     Application() = default;
     ~Application() = default;
