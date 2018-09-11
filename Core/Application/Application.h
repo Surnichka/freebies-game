@@ -6,7 +6,7 @@
 namespace core
 {
     class Resources;
-    class CharacterCreator;
+    class AnimatorFactory;
     class PhysicWorld;
 }
 
@@ -25,7 +25,7 @@ public:
     sf::Vector2f windowSize = {1440, 1024};
     std::chrono::milliseconds frameTime;
     std::unique_ptr<core::Resources> resources;
-    std::unique_ptr<core::CharacterCreator> characterCreator;
+    std::unique_ptr<core::AnimatorFactory> animatorFactory;
     std::unique_ptr<core::PhysicWorld> physicWorld;
 private:
     Application() = default;

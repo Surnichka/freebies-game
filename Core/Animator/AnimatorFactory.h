@@ -1,14 +1,16 @@
 #pragma once
-#include "Character.h"
+#include "Animator.h"
+#include <memory>
 
 namespace core
 {
+
 class CharacterParser;
-class CharacterCreator
+struct AnimatorFactory
 {
 public:
     void Init();
-    Character Create(const std::string& name);
+    Animator Create(const std::string& name);
 private:
     std::unique_ptr<CharacterParser> m_parser;
 };

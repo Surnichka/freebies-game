@@ -11,12 +11,17 @@ class IAnimation
 public:
     using uPtr = std::unique_ptr<IAnimation>;
 
+    IAnimation() = default;
     virtual ~IAnimation() = default;
+
+    IAnimation(IAnimation&&) = default;
+    IAnimation& operator=(IAnimation&&) = default;
+
     virtual void Start(std::chrono::milliseconds duration) = 0;
     virtual void Stop() = 0;
-    virtual void Update(Entity& entity) = 0;
+    virtual bool Update(Entity& entity) = 0;
 
-    inline bool IsRunning() const { return m_timer.IsRunning(); }
+    bool IsRunning() const { return m_timer.IsRunning(); }
 protected:
     Timer m_timer;
 };

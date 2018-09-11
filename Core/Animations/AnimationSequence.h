@@ -6,13 +6,13 @@
 namespace core
 {
 
-class FrameAnimation : public IAnimation
+class AnimationSequence : public IAnimation
 {
 public:
-    explicit FrameAnimation(const std::string& holder, const std::vector<std::string>& textureIds);
+    explicit AnimationSequence(const std::string& holder, const std::vector<std::string>& textureIds);
     void Start(std::chrono::milliseconds duration) override;
     void Stop() override;
-    void Update(Entity& entity) override;
+    bool Update(Entity& entity) override;
 private:
     std::string m_resouceHolderId;
     std::vector<std::string> m_textureIds;

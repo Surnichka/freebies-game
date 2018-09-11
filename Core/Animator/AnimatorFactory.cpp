@@ -1,20 +1,22 @@
-#include "CharacterCreator.h"
-#include "../AssetsParser/CharacterParser.h"
-#include "../Application/Application.h"
-#include "../Resources/Resources.h"
-#include <SFML/Graphics/Texture.hpp>
-#include "Animations.h"
+#include "AnimatorFactory.h"
 
+#include <SFML/Graphics/Texture.hpp>
+
+#include "../Application/Application.h"
+#include "../AssetsParser/CharacterParser.h"
+#include "../Resources/Resources.h"
+
+#include "../Animations/AnimationSequence.h"
 namespace core
 {
 
-void CharacterCreator::Init()
+void AnimatorFactory::Init()
 {
     m_parser = std::make_unique<CharacterParser>();
     m_parser->Parse();
 }
 
-Character CharacterCreator::Create(const std::string &name)
+Animator AnimatorFactory::Create(const std::string &name)
 {
     if( false == m_parser->HasCharacter(name) )
     {
@@ -23,7 +25,7 @@ Character CharacterCreator::Create(const std::string &name)
 
     auto resources = Application::Get().resources->GetHolder<sf::Texture>(name);
 
-    Character character;
+    Animator animator;
     const auto& animMap = m_parser->GetAnimations(name);
     for(const auto& p : animMap)
     {
@@ -38,11 +40,11 @@ Character CharacterCreator::Create(const std::string &name)
             resources->Aquire(key, path);
             textureIds.emplace_back(key);
         }
-        auto frameAnim = std::make_unique<FrameAnimation>(name, std::move(textureIds));
-        character.AddAnimation(animId, std::move(frameAnim));
+        auto frameAnim = std::make_unique<AnimationSequence>(name, std::move(textureIds));
+        animator.AddAnimation(animId, std::move(frameAnim));
     }
     resources->Load();
-    return character;
+    return animator;
 }
 
 } //end of core

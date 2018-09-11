@@ -55,6 +55,7 @@ void World2::Init()
             mapResources->Aquire("box", texturePath);
 
             m_map.emplace_back(Entity());
+            m_map.back().SetSize({tileWidth, tileHeight});
             m_map.back().SetBody({posInWorld.x + tileWidth / 2,
                                   posInWorld.y + tileHeight / 2,
                                   tileWidth,
@@ -65,6 +66,7 @@ void World2::Init()
         posInWorld.x = 0;
     }
 
+    m_character.SetSize({50, 50});
     m_character.SetBody({700, 100, 50, 50}, b2_dynamicBody);
     m_character.SetTexture("map", "box");
 }

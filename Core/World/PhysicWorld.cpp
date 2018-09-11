@@ -9,8 +9,8 @@ namespace config
 {
     const b2Vec2 gravity = {0.0f, 0.0f};
     const constexpr float timeStep = 1.0f / 60.0f;
-    const int32_t velocityIterations = 8;
-    const int32_t positionIterations = 3;
+    const int32_t velocityIterations = 50;
+    const int32_t positionIterations = 50;
 }
 
 void PhysicWorld::Init()

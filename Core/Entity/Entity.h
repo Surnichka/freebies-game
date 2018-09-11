@@ -3,6 +3,8 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 
+#include <SFML/Graphics/RectangleShape.hpp> //debug draw
+
 namespace core
 {
 
@@ -20,7 +22,10 @@ public:
     Entity& operator=(Entity&&) = default;
 
     void SetTexture(const std::string& holder, const std::string& id);
+
+    void SetSize(const sf::Vector2f& size);
     void SetBody(const sf::FloatRect& box, b2BodyType bodyType);
+    void SetFlip(bool xFlip, bool yFlip = false);
 
     void ApplyForce(sf::Vector2f force);
     void Update();
@@ -31,8 +36,13 @@ private:
     b2Body* m_rigidBody = nullptr;
     sf::Vector2f m_velocity;
 
-    sf::FloatRect m_textureRect;
+    sf::Vector2f m_size;
     sf::Sprite m_sprite;
+    std::pair<bool, bool> m_flip = {false, false};
+
+
+
+    sf::RectangleShape m_debugBox;
 };
 
 }
