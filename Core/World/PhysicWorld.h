@@ -17,7 +17,7 @@ public:
     b2Body* CreateBox(const sf::FloatRect& box, b2BodyType bodyType);
     void RemoveFromWorld(b2Body* body);
 
-    sf::Vector2f GetGravity() const;
+    std::unique_ptr<b2World>& GetB2World();
 private:
     std::unique_ptr<b2World> m_world;
 };

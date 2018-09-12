@@ -50,9 +50,9 @@ void PhysicWorld::RemoveFromWorld(b2Body *body)
     m_world->DestroyBody(body);
 }
 
-sf::Vector2f PhysicWorld::GetGravity() const
+std::unique_ptr<b2World> &PhysicWorld::GetB2World()
 {
-    return {config::gravity.x, config::gravity.y};
+    return m_world;
 }
 
 } //end of core
