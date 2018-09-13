@@ -2,38 +2,31 @@
 #include "SFML/Window/Event.hpp"
 
 #include "Core/Application/Application.h"
-#include "Core/Animator/AnimatorFactory.h"
-#include "Core/Animator/Animator.h"
 
-#include <Box2D/Box2D.h>
 #include "Core/World/World.h"
-#include "Core/World/PhysicWorld.h"
+#include <Box2D/Box2D.h>
 #include "Core/World/PhysicDebugDraw.h"
 
-#include "Core/Character/Character.h"
+#include <chrono>
 int main()
 {
     auto& app = Application::Get();
     app.Init();
 
-    core::World world;
-    world.Init();
-
     sf::RenderWindow window(sf::VideoMode(static_cast<uint32_t>(app.windowSize.x),
                                           static_cast<uint32_t>(app.windowSize.y)),
                                           "FREEBIES");
-
-    auto animator = app.animatorFactory->Create("knight");
-
-    core::Character demoCharacter;
-    demoCharacter.Init(std::move(animator));
-    demoCharacter.SetSize({120, 120});
-    demoCharacter.SetBody({200, 150, 65, 80}, b2_dynamicBody);
+    window.setFramerateLimit(60);
 
     core::PhysicDebugDraw b2DebugDraw(window);
-    app.physicWorld->GetB2World()->SetDebugDraw(&b2DebugDraw);
+    app.world->GetPhysicWorld()->SetDebugDraw(&b2DebugDraw);
 
-    window.setFramerateLimit(60);
+    auto character = app.world->CreateCharacter("knight", {100, 100, 100, 100}, {60, 80});
+//    character.SetController(Player::One);
+//    character.SetController(Player::Two);
+
+//    character.SetController(AI::Patrul);
+//    character.SetController(AI::Agressive);
 
     while (window.isOpen())
     {
@@ -53,18 +46,16 @@ int main()
             {
             }
         }
-        app.frameTime = 15ms;
+        app.frameTime = std::chrono::milliseconds(15);
 
-        app.physicWorld->Update();
-        world.Update();
+        character.ApplyForce({0.0f, 10.0f});
+        character.Update();
+        app.world->Update();
 
-        demoCharacter.ApplyForce(sf::Vector2f(0.0f, 10.0f)); //Gravity
-        demoCharacter.Update();
+        app.world->Draw(window);
+        character.Draw(window);
 
-        world.Draw(window);
-        demoCharacter.Draw(window);
-
-        app.physicWorld->GetB2World()->DrawDebugData();
+        app.world->GetPhysicWorld()->DrawDebugData();
 
         window.display();
     }

@@ -1,6 +1,6 @@
 #include "PhysicDebugDraw.h"
 #include <SFML/Graphics/Color.hpp>
-#include "../Math/WorldConvertations.h"
+#include "../World/PhysicWorldUtils.h"
 
 namespace core
 {
@@ -17,7 +17,7 @@ namespace helper
 
     sf::Vector2f b2VecToSFML(const b2Vec2& vec)
     {
-        return {math::MeterToPixel(vec.x), math::MeterToPixel(vec.y)};
+        return {MeterToPixel(vec.x), MeterToPixel(vec.y)};
     }
 }
 
@@ -63,8 +63,8 @@ void PhysicDebugDraw::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount
 }
 void PhysicDebugDraw::DrawCircle(const b2Vec2& center, float32 radius, const b2Color& color)
 {
-    sf::CircleShape circle(math::MeterToPixel(radius));
-    circle.setOrigin(math::MeterToPixel(radius), math::MeterToPixel(radius));
+    sf::CircleShape circle(MeterToPixel(radius));
+    circle.setOrigin(MeterToPixel(radius), MeterToPixel(radius));
     circle.setPosition(helper::b2VecToSFML(center));
     circle.setFillColor(sf::Color::Transparent);
     circle.setOutlineThickness(-1.f);
@@ -74,8 +74,8 @@ void PhysicDebugDraw::DrawCircle(const b2Vec2& center, float32 radius, const b2C
 }
 void PhysicDebugDraw::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color)
 {
-    sf::CircleShape circle(math::MeterToPixel(radius));
-    circle.setOrigin(math::MeterToPixel(radius), math::MeterToPixel(radius));
+    sf::CircleShape circle(MeterToPixel(radius));
+    circle.setOrigin(MeterToPixel(radius), MeterToPixel(radius));
     circle.setPosition(helper::b2VecToSFML(center));
     circle.setFillColor(helper::b2ColorToSFML(color, 60));
     circle.setOutlineThickness(1.f);

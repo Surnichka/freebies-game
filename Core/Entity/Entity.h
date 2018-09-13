@@ -3,7 +3,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 
-#include <SFML/Graphics/RectangleShape.hpp>
+#include "../World/PhysicWorldUtils.h"
 
 namespace core
 {
@@ -24,7 +24,7 @@ public:
     void SetTexture(const std::string& holder, const std::string& id);
 
     void SetSize(const sf::Vector2f& size);
-    void SetBody(const sf::FloatRect& box, b2BodyType bodyType);
+    void SetBody(BodyPtr&& body);
     void SetFlip(bool xFlip, bool yFlip = false);
 
     void ApplyForce(sf::Vector2f force);
@@ -35,14 +35,12 @@ public:
 private:
     void updateSprite();
 
-    b2Body* m_rigidBody = nullptr;
+    BodyPtr m_rigidBody;
     sf::Vector2f m_velocity;
 
-    sf::Vector2f m_size;
     sf::Sprite m_sprite;
+    sf::Vector2f m_size;
     std::pair<bool, bool> m_flip = {false, false};
-
-    sf::RectangleShape m_debugBox;
 };
 
 }

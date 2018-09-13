@@ -1,10 +1,9 @@
 #include "Character.h"
 #include "SFML/Window/Event.hpp"
 #include "../Application/Application.h"
-#include "../World/PhysicWorld.h"
 #include "../Animations/FadeAnimation.h"
+
 #include <map>
-#include <experimental/optional>
 
 namespace core
 {
@@ -19,7 +18,7 @@ void Character::Init(Animator &&animator)
     nullptr, //ConditionToEnter
     [this](fsm::StateMachine&) //OnEnter
     {
-        m_animator.RunAnimation(FadeBy::Create(10), 1000ms);
+//        m_animator.RunAnimation(FadeBy::Create(10), 1000ms);
         m_animator.Loop("idle", 500ms);
     },
     nullptr, //OnUpdate

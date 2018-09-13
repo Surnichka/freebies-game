@@ -7,7 +7,7 @@ namespace core
 {
     class Resources;
     class AnimatorFactory;
-    class PhysicWorld;
+    class World;
 }
 
 class Application
@@ -26,7 +26,7 @@ public:
     std::chrono::milliseconds frameTime;
     std::unique_ptr<core::Resources> resources;
     std::unique_ptr<core::AnimatorFactory> animatorFactory;
-    std::unique_ptr<core::PhysicWorld> physicWorld;
+    std::unique_ptr<core::World> world;
 private:
     Application() = default;
     ~Application() = default;

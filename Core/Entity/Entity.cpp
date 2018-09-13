@@ -1,7 +1,7 @@
 #include "Entity.h"
 #include "../Application/Application.h"
-#include "../World/PhysicWorld.h"
-#include "../Math/WorldConvertations.h"
+#include "../World/World.h"
+
 #include "../Resources/Resources.h"
 #include "SFML/Graphics/Texture.hpp"
 
@@ -10,10 +10,7 @@ namespace core
 
 Entity::~Entity()
 {
-    if(nullptr != m_rigidBody)
-    {
-        Application::Get().physicWorld->RemoveFromWorld(m_rigidBody);
-    }
+
 }
 
 void Entity::SetTexture(const std::string& holder, const std::string &id)
@@ -28,16 +25,9 @@ void Entity::SetSize(const sf::Vector2f &size)
     m_size = size;
 }
 
-void Entity::SetBody(const sf::FloatRect &box, b2BodyType bodyType)
+void Entity::SetBody(BodyPtr&& body)
 {
-    m_debugBox.setPosition(box.left, box.top);
-    m_debugBox.setOrigin(box.width / 2, box.height / 2);
-    m_debugBox.setSize({box.width, box.height});
-    m_debugBox.setFillColor({255, 0, 0, 100});
-    m_debugBox.setOutlineColor(sf::Color::Black);
-    m_debugBox.setOutlineThickness(1.0f);
-
-    m_rigidBody = Application::Get().physicWorld->CreateBox(box, bodyType);
+    m_rigidBody = std::move(body);
     updateSprite();
 }
 
@@ -68,12 +58,10 @@ void Entity::Update()
     {
         m_rigidBody->SetLinearVelocity({m_velocity.x, m_velocity.y});
 
-        auto xPos = math::MeterToPixel(m_rigidBody->GetPosition().x);
-        auto yPos = math::MeterToPixel(m_rigidBody->GetPosition().y);
+        auto xPos = MeterToPixel(m_rigidBody->GetPosition().x);
+        auto yPos = MeterToPixel(m_rigidBody->GetPosition().y);
         m_sprite.setPosition({xPos, yPos});
-        m_debugBox.setPosition({xPos, yPos});
     }
-
     m_velocity = sf::Vector2f();
 }
 

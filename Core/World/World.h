@@ -1,9 +1,14 @@
 #pragma once
 #include <vector>
-#include "../Entity/Entity.h"
-#include "../Character/Character.h"
+
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+
+#include "../Entity/Entity.h"
+#include "../Character/Character.h"
+
+#include "PhysicWorldUtils.h"
+
 namespace core
 {
 
@@ -14,14 +19,18 @@ public:
 
     void Update();
     void Draw(sf::RenderWindow& window);
-//    Character CreateCharacter(const std::string& name,
-//                              const sf::Vector2f& pos,
-//                              const sf::Vector2f& characterSize,
-//                              const sf::Vector2f& rigidBodySize,
-//                              b2BodyType bodyType);
+
+    std::unique_ptr<b2World>& GetPhysicWorld();
+
+    Character CreateCharacter(const std::string& name,
+                              sf::FloatRect spriteRect,
+                              sf::Vector2f rigidBodySize);
 private:
+    BodyPtr createTileBox(sf::FloatRect rect);
+
+    std::unique_ptr<b2World> m_physicWorld;
+    std::vector<Entity> m_entities;
     sf::Sprite m_background;
-    std::vector<Entity> m_tiles;
 };
 
 } //end of core

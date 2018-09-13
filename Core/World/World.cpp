@@ -1,23 +1,30 @@
 #include "World.h"
-#include "../AssetsParser/MapParser.h"
-#include "../Resources/Resources.h"
-#include "../Animator/AnimatorFactory.h"
-#include "../Application/Application.h"
+
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Window/Event.hpp>
-#include "PhysicWorld.h"
-#include "Box2D/Dynamics/b2World.h"
+
+#include <Box2D/Box2D.h>
+
+#include "../Application/Application.h"
+#include "../AssetsParser/MapParser.h"
+#include "../Animator/AnimatorFactory.h"
+#include "../Resources/Resources.h"
 
 namespace core
 {
 
 namespace config
 {
-    const sf::Vector2f gravity = {0.0f, 10.0f};
+    const b2Vec2 gravity = {0.0f, 0.0f};
+    const constexpr float timeStep = 1.0f / 60.0f;
+    const int32_t velocityIterations = 8;
+    const int32_t positionIterations = 3;
 }
 
 void World::Init()
 {
+    m_physicWorld = std::make_unique<b2World>(config::gravity);
+
     MapParser parser;
     parser.Parse();
 
@@ -35,7 +42,7 @@ void World::Init()
     }
 
     const auto& mapGrid = parser.GetMapGrid();
-    m_tiles.reserve(mapGrid.size() * mapGrid.front().size());
+    m_entities.reserve(mapGrid.size() * mapGrid.front().size());
     float tileWidth = windowSize.x / mapGrid.cbegin()->size();
     float tileHeight = windowSize.y / mapGrid.size();
 
@@ -55,14 +62,16 @@ void World::Init()
 
             mapResources->Aquire("box", texturePath);
 
-            m_tiles.emplace_back(Entity());
-            m_tiles.back().SetSize({tileWidth, tileHeight});
-            m_tiles.back().SetBody({posInWorld.x + tileWidth / 2,
-                                  posInWorld.y + tileHeight / 2,
-                                  tileWidth,
-                                  tileHeight},
-                                  b2_staticBody);
-            m_tiles.back().SetTexture("map", "box");
+            m_entities.emplace_back(Entity());
+            m_entities.back().SetSize({tileWidth, tileHeight});
+
+            auto tileBody = createTileBox({posInWorld.x + tileWidth / 2,
+                                           posInWorld.y + tileHeight / 2,
+                                           tileWidth,
+                                           tileHeight});
+
+            m_entities.back().SetBody( std::move(tileBody) );
+            m_entities.back().SetTexture("map", "box");
         }
         posInWorld.x = 0;
     }
@@ -70,34 +79,72 @@ void World::Init()
 
 void World::Update()
 {
-    for(auto& tile : m_tiles)
+    GetPhysicWorld()->Step(config::timeStep, config::positionIterations, config::velocityIterations);
+    for(auto& entity : m_entities)
     {
-        tile.Update();
+        entity.Update();
     }
 }
 
 void World::Draw(sf::RenderWindow &window)
 {
     window.draw(m_background);
-    for(const auto& tile : m_tiles)
+    for(const auto& entity : m_entities)
     {
-        tile.Draw(window);
+        entity.Draw(window);
     }
 }
 
-//Character World::CreateCharacter(const std::string& name,
-//                                 const sf::Vector2f& pos,
-//                                 const sf::Vector2f& characterSize,
-//                                 const sf::Vector2f& rigidBodySize,
-//                                 b2BodyType bodyType)
-//{
-//    core::Character character;
-//    character.Init();
-//    character.m_animator = Application::Get().animatorFactory->Create(name);
-//    character.SetSize(characterSize);
-//    character.SetBody({pos.x, pos.y, rigidBodySize.x, rigidBodySize.y}, bodyType);
-//    return character;
-//}
+std::unique_ptr<b2World>& World::GetPhysicWorld()
+{
+    return m_physicWorld;
+}
 
+Character World::CreateCharacter(const std::string &name,
+                                 sf::FloatRect spriteRect,
+                                 sf::Vector2f rigidBodySize)
+{
+    b2BodyDef bodyDef;
+    bodyDef.type = b2BodyType::b2_dynamicBody;
+    bodyDef.fixedRotation = true;
+    bodyDef.position.Set(PixelToMeter(spriteRect.left), PixelToMeter(spriteRect.top) );
+
+    b2PolygonShape shape;
+    shape.SetAsBox(PixelToMeter(rigidBodySize.x / 2), PixelToMeter(rigidBodySize.y / 2));
+
+    b2FixtureDef fixtureDef;
+    fixtureDef.shape = &shape;
+    fixtureDef.density = 1.0f;
+
+    BodyPtr body( GetPhysicWorld()->CreateBody(&bodyDef) );
+    body->CreateFixture(&fixtureDef);
+
+    Animator animator = Application::Get().animatorFactory->Create(name);
+
+    Character character;
+    character.Init(std::move(animator));
+    character.SetSize({spriteRect.width, spriteRect.height});
+    character.SetBody(std::move(body));
+
+    return character;
+}
+
+BodyPtr World::createTileBox(sf::FloatRect rect)
+{
+    b2BodyDef bodyDef;
+    bodyDef.type = b2BodyType::b2_staticBody;
+    bodyDef.position.Set(PixelToMeter(rect.left), PixelToMeter(rect.top) );
+
+    b2PolygonShape shape;
+    shape.SetAsBox(PixelToMeter(rect.width / 2), PixelToMeter(rect.height / 2));
+
+    b2FixtureDef fixtureDef;
+    fixtureDef.shape = &shape;
+
+    BodyPtr body( GetPhysicWorld()->CreateBody(&bodyDef) );
+    body->CreateFixture(&fixtureDef);
+
+    return body;
+}
 
 } //end of core
