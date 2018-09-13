@@ -3,7 +3,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 
-#include <SFML/Graphics/RectangleShape.hpp> //debug draw
+#include <SFML/Graphics/RectangleShape.hpp>
 
 namespace core
 {
@@ -13,7 +13,7 @@ class Entity
 {
 public:
     Entity() = default;
-    ~Entity();
+    virtual ~Entity();
 
     Entity(const Entity&) = delete;
     Entity& operator=(const Entity&) = delete;
@@ -28,8 +28,10 @@ public:
     void SetFlip(bool xFlip, bool yFlip = false);
 
     void ApplyForce(sf::Vector2f force);
-    void Update();
-    void Draw(sf::RenderWindow& window) const;
+    sf::Sprite& GetSprite();
+
+    virtual void Update();
+    virtual void Draw(sf::RenderWindow& window) const;
 private:
     void updateSprite();
 
@@ -39,8 +41,6 @@ private:
     sf::Vector2f m_size;
     sf::Sprite m_sprite;
     std::pair<bool, bool> m_flip = {false, false};
-
-
 
     sf::RectangleShape m_debugBox;
 };

@@ -17,13 +17,17 @@ public:
     IAnimation(IAnimation&&) = default;
     IAnimation& operator=(IAnimation&&) = default;
 
-    virtual void Start(std::chrono::milliseconds duration) = 0;
+    virtual void Start(std::chrono::milliseconds duration, bool loop = false) = 0;
     virtual void Stop() = 0;
     virtual bool Update(Entity& entity) = 0;
 
-    bool IsRunning() const { return m_timer.IsRunning(); }
+    inline bool IsRunning() const
+    {
+        return m_timer.IsRunning();
+    }
 protected:
     Timer m_timer;
+    bool m_loop = false;
 };
 
 } //end of core

@@ -15,10 +15,11 @@ AnimationSequence::AnimationSequence(const std::string &holder, const std::vecto
     }
 }
 
-void AnimationSequence::Start(std::chrono::milliseconds duration)
+void AnimationSequence::Start(std::chrono::milliseconds duration, bool loop)
 {
     m_timer.Setup(Timer::Config(duration));
     m_timer.Start();
+    m_loop = loop;
 }
 
 void AnimationSequence::Stop()
@@ -28,22 +29,30 @@ void AnimationSequence::Stop()
 
 bool AnimationSequence::Update(Entity& entity)
 {
+    bool active = true;
+
     m_timer.Update();
-    if( false == m_timer.IsRunning() )
+    if( m_timer.IsRunning())
     {
-        return false;
+        const auto& info = m_timer.GetInfo();
+        auto animFramesCount = m_textureIds.size() - 1;
+        size_t curAnimIdx = math::RangeMap(info.durationElapsed,
+                                           0ms, info.config.duration,
+                                           0ul, animFramesCount);
+
+        auto textureId = m_textureIds[curAnimIdx];
+        entity.SetTexture(m_resouceHolderId, textureId);
+    }
+    else
+    {
+        active = m_loop;
+        if(m_loop)
+        {
+            m_timer.Restart();
+        }
     }
 
-    const auto& info = m_timer.GetInfo();
-    auto animFramesCount = m_textureIds.size() - 1;
-    size_t curAnimIdx = math::RangeMap(info.durationElapsed,
-                                       0ms, info.config.duration,
-                                       0ul, animFramesCount);
-
-    auto textureId = m_textureIds[curAnimIdx];
-    entity.SetTexture(m_resouceHolderId, textureId);
-
-    return true;
+    return active;
 }
 
 } //end of core

@@ -29,6 +29,7 @@ b2Body* PhysicWorld::CreateBox(const sf::FloatRect &rect, b2BodyType bodyType)
 
     b2BodyDef bodyDef;
     bodyDef.type = bodyType;
+    bodyDef.fixedRotation = true;
     bodyDef.position.Set(math::PixelToMeter(rect.left), math::PixelToMeter(rect.top) );
 
     b2PolygonShape shape;

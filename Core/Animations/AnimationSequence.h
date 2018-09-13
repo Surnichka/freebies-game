@@ -10,7 +10,7 @@ class AnimationSequence : public IAnimation
 {
 public:
     explicit AnimationSequence(const std::string& holder, const std::vector<std::string>& textureIds);
-    void Start(std::chrono::milliseconds duration) override;
+    void Start(std::chrono::milliseconds duration, bool loop = false) override;
     void Stop() override;
     bool Update(Entity& entity) override;
 private:

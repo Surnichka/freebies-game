@@ -1,4 +1,5 @@
 #include "Animator.h"
+#include <algorithm>
 
 namespace core
 {
@@ -28,26 +29,18 @@ void Animator::AddAnimation(const std::string& id, IAnimation::uPtr&& animation)
 
 void Animator::RunAnimation(IAnimation::uPtr&& animation, std::chrono::milliseconds duration)
 {
-    m_animations["[external/animation]"] = std::move(animation);
-    m_activeAnim->second->Start(duration);
+    m_actions.emplace_back(std::move(animation));
+    m_actions.back()->Start(duration);
 }
 
 void Animator::Play(const std::string& id, std::chrono::milliseconds duration)
 {
-    auto iter = m_animations.find(id);
-    if( iter != m_animations.end() )
-    {
-        if(m_activeAnim != m_animations.end())
-        {
-            m_activeAnim->second->Stop();
-        }
-        m_activeAnim = iter;
-        m_activeAnim->second->Start(duration);
-    }
-    else
-    {
-        m_activeAnim = m_animations.end();
-    }
+    play(id, duration, false);
+}
+
+void Animator::Loop(const std::string &id, std::chrono::milliseconds duration)
+{
+    play(id, duration, true);
 }
 
 void Animator::Stop()
@@ -84,6 +77,31 @@ void Animator::Update(Entity& entity)
         {
             m_activeAnim = m_animations.end();
         }
+    }
+
+    auto iter = std::remove_if(m_actions.begin(), m_actions.end(), [&entity](auto& action)
+    {
+        bool hasUpdated = (action->Update(entity));
+        return (false == hasUpdated);
+    });
+    m_actions.erase(iter, m_actions.end());
+}
+
+void Animator::play(const std::string &id, std::chrono::milliseconds duration, bool loop)
+{
+    auto iter = m_animations.find(id);
+    if( iter != m_animations.end() )
+    {
+        if(m_activeAnim != m_animations.end())
+        {
+            m_activeAnim->second->Stop();
+        }
+        m_activeAnim = iter;
+        m_activeAnim->second->Start(duration, loop);
+    }
+    else
+    {
+        m_activeAnim = m_animations.end();
     }
 }
 

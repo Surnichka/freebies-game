@@ -57,6 +57,11 @@ void Entity::ApplyForce(sf::Vector2f force)
     m_velocity += force;
 }
 
+sf::Sprite &Entity::GetSprite()
+{
+    return m_sprite;
+}
+
 void Entity::Update()
 {
     if(nullptr != m_rigidBody)
@@ -75,7 +80,6 @@ void Entity::Update()
 void Entity::Draw(sf::RenderWindow &window) const
 {
     window.draw(m_sprite);
-    window.draw(m_debugBox);
 }
 
 void Entity::updateSprite()

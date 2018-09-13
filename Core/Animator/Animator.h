@@ -1,6 +1,8 @@
 #pragma once
 #include "../Animations/IAnimation.h"
+#include <chrono>
 #include <map>
+#include <vector>
 
 namespace core
 {
@@ -23,9 +25,12 @@ public:
     /// \brief Run external animation once.
     void RunAnimation(IAnimation::uPtr&& animation, std::chrono::milliseconds duration);
 
-    /// \brief Play animation on given 'id' for specified duration time, if 'id'
-    /// doesn't exist function won't do anything.
+    /// \brief Play animation on given 'id' for specified duration time
+    /// otherwise if 'id' doesn't exist function won't start animation
     void Play(const std::string& id, std::chrono::milliseconds duration);
+
+    /// \brief Same as Play, expect will loop the animation
+    void Loop(const std::string& id, std::chrono::milliseconds duration);
 
     void Stop();
     bool Has(const std::string& id) const;
@@ -34,9 +39,12 @@ public:
     bool IsPlaying(const std::string& id = "") const;
 
     void Update(Entity& entity);
-//private:
+private:
+    void play(const std::string& id, std::chrono::milliseconds duration, bool loop);
+
     using AnimationMap = std::map<std::string, IAnimation::uPtr>;
     AnimationMap m_animations;
+    std::vector<IAnimation::uPtr> m_actions;
     AnimationMap::iterator m_activeAnim = m_animations.end();
 };
 

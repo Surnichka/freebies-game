@@ -1,201 +1,111 @@
 #include "Character.h"
 #include "SFML/Window/Event.hpp"
+#include "../Application/Application.h"
+#include "../World/PhysicWorld.h"
+#include "../Animations/FadeAnimation.h"
 #include <map>
 #include <experimental/optional>
 
 namespace core
 {
 
-void Character::Init()
+void Character::Init(Animator &&animator)
 {
-    attacking.name = "attack";
-    attacking.onEnterFn = [this] ()
+    m_animator = std::move(animator);
+
+////////////////////////////////////////////////////////////////////////////
+    m_stateMachine.defaultState = "idle";
+    m_stateMachine.AddState("idle",
+    nullptr, //ConditionToEnter
+    [this](fsm::StateMachine&) //OnEnter
     {
-        m_animator.Play("attack", 500ms);
-    };
-    attacking.onUpdateFn = [this] ()
-    {
-        if( false == m_animator.IsPlaying("attack"))
-        {
-            currentState = &standing;
-            currentState->onEnterFn();
-        }
-    };
-    attacking.conditionsFn = []()
+        m_animator.RunAnimation(FadeBy::Create(10), 1000ms);
+        m_animator.Loop("idle", 500ms);
+    },
+    nullptr, //OnUpdate
+    {"run", "attack", "jump"}); //TransitionList
+////////////////////////////////////////////////////////////////////////////
+
+    m_stateMachine.AddState("attack",
+    [](fsm::StateMachine&) //ConditionToEnter
     {
         return sf::Keyboard::isKeyPressed(sf::Keyboard::K);
-    };
-    attacking.transitionList = {&running};
-//////////////////////////////////////////////////////////////////
-
-    running.name = "run";
-    running.onEnterFn = [this] ()
+    },
+    [this](fsm::StateMachine& sm) //OnEnter
     {
-        m_animator.Play("run", 500ms);
-    };
+        m_animator.Play("attack", 300ms);
+        sm.RequestState("idle", 300ms);
+    },
+    nullptr, //OnUpdate
+    {"idle"}); //TransitionList
 
-    running.isDynamic = true;
-    running.onUpdateFn = [this] ()
-    {
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-        {
-            Entity::SetFlip(true);
-            Entity::ApplyForce({-10.0f, 0.0f});
-        }
-        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-        {
-            Entity::SetFlip(false);
-            Entity::ApplyForce({10.0f, 0.0f});
-        }
+////////////////////////////////////////////////////////////////////////////
 
-        if( false == m_animator.IsPlaying("run"))
-        {
-            m_animator.Play("run", 500ms);
-        }
-    };
-    running.conditionsFn = []()
+    const auto& runState = m_stateMachine.AddState("run",
+    [](fsm::StateMachine&) //ConditionToEnter
     {
         return sf::Keyboard::isKeyPressed(sf::Keyboard::A) ||
                sf::Keyboard::isKeyPressed(sf::Keyboard::D);
-    };
-
-//////////////////////////////////////////////////////////////////
-    standing.name = "idle";
-    standing.onEnterFn = [this] () { m_animator.Play("idle", 500ms); };
-    standing.onUpdateFn = [this] ()
+    },
+    [this](fsm::StateMachine&) //OnEnter
     {
-        if( false == m_animator.IsPlaying("idle"))
-        {
-            m_animator.Play("idle", 500ms);
-        }
-    };
-    standing.conditionsFn = []() { return true; };
+        m_animator.Loop("run", 500ms);
+    },
+    [this](fsm::StateMachine&)
+    {
+        moveCharacter();
+    },
+    {"idle", "jump", "attack"}); //TransitionList
+    runState->isDynamic = true;
+////////////////////////////////////////////////////////////////////////////
 
-    standing.transitionList = {&running, &attacking};
-//////////////////////////////////////////////////////////////////
-    currentState = &standing;
-    currentState->onEnterFn();
+    m_stateMachine.AddState("jump",
+    [](fsm::StateMachine&) //ConditionToEnter
+    {
+        //auto collisionList = Application::Get().physicWorld->GetCollisionList(*this);
+        //find in collisionList if character is touching solid ground
+        return sf::Keyboard::isKeyPressed(sf::Keyboard::W);
+    },
+    [this](fsm::StateMachine& sm) //OnEnter
+    {
+        m_animator.Play("jump", 500ms);
+        sm.RequestState("idle", 500ms); //temporary
+    },
+    [](fsm::StateMachine&)
+    {
+        //auto collisionList = Application::Get().physicWorld->GetCollisionList(*this);
+        //find in collisionList if character is touching solid ground if yes, request state
+        //sm.RequestState("idle");
+    }, //OnUpdate
+    {"idle", "attack"}); //TransitionList
+    ////////////////////////////////////////////////////////////////////////////
 }
 
 void Character::Update()
 {
-    if(currentState->isDynamic)
-    {
-        if( currentState->conditionsFn() )
-        {
-            currentState->onUpdateFn();
-        }
-        else
-        {
-            currentState = &standing;
-            currentState->onEnterFn();
-        }
-    }
-    else
-    {
-        currentState->onUpdateFn();
-    }
-
-    for(auto& state : currentState->transitionList)
-    {
-        bool conditionsMet = state->conditionsFn();
-        if( conditionsMet )
-        {
-            currentState = state;
-            currentState->onEnterFn();
-            break;
-        }
-    }
-
-//    State::Attacking att;
-//    att.canInterupt = false;
-//    att.isDynamic = false;
-//    att.onEnd = switchToIdle / loop
-
-
-
-//    /// \brief states that need to be actively requested to be played
-//    State requestActiveState;
-//    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) requestActiveState = State::Running;
-//    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) requestActiveState = State::Running;
-
-//    /// \brief states that need to just to be switched to get activated
-//    State requestPassiveState;
-//    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) requestPassiveState = State::Jumping;
-//    if(sf::Keyboard::isKeyPressed(sf::Keyboard::K)) requestPassiveState = State::Attacking;
-
-//    if( requestActiveState != m_currentState )
-//    {
-//        if(requestPassiveState == State::Jumping)   m_animator.Play("jump", 500ms);
-//        if(requestPassiveState == State::Attacking) m_animator.Play("attack", 500ms);
-//    }
-
-//    if(requestState != std::experimental::nullopt &&
-//       m_currentState != requestState.value())
-//    {
-//        m_currentState = requestState.value();
-//        switch( m_currentState )
-//        {
-//            case State::Standing:
-//            {
-
-//            }break;
-//            case State::Running:
-//            {
-//                m_animator.Play("run", 500ms);
-//            }break;
-
-//            case State::Jumping:
-//            {
-//                m_animator.Play("jump", 500ms);
-//            }break;
-
-//            case State::Attacking:
-//            {
-//                m_animator.Play("attack", 500ms);
-//            }break;
-//        };
-//    }
-
-//    switch( m_currentState )
-//    {
-//        case State::Jumping:
-//        {
-//            if( false == m_animator.IsPlaying("jump"))
-//            {
-//                m_currentState = State::Standing;
-//                m_animator.Play("idle", 500ms);
-//            }
-//        }break;
-
-//        case State::Attacking:
-//        {
-//            if( false == m_animator.IsPlaying("attack"))
-//            {
-//                m_currentState = State::Standing;
-//                m_animator.Play("idle", 500ms);
-//            }
-//        }break;
-
-//        case State::Standing:
-//        {
-//            if( false == m_animator.IsPlaying("idle") )
-//            {
-//                m_animator.Play("idle", 500ms);
-//            }
-//        }break;
-
-//        case State::Running:
-//        {
-//            if( false == m_animator.IsPlaying("run") )
-//            {
-//                m_animator.Play("run", 500ms);
-//            }
-//        }break;
-//    }
-
+    m_stateMachine.Update();
     Entity::Update();
     m_animator.Update(*this);
+}
+
+void Character::Draw(sf::RenderWindow &window) const
+{
+    Entity::Draw(window);
+}
+
+void Character::moveCharacter()
+{
+    float speed = 10.0f;
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+    {
+        Entity::SetFlip(true);
+        Entity::ApplyForce({-speed, 0.0f});
+    }
+    else if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+    {
+        Entity::SetFlip(false);
+        Entity::ApplyForce({speed, 0.0f});
+    }
 }
 
 } //end of core
