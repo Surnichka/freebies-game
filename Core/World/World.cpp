@@ -9,6 +9,7 @@
 #include "../AssetsParser/MapParser.h"
 #include "../Animator/AnimatorFactory.h"
 #include "../Resources/Resources.h"
+#include "PhysicWorldUtils.h"
 
 namespace core
 {
@@ -112,12 +113,30 @@ Character World::CreateCharacter(const std::string &name,
     b2PolygonShape shape;
     shape.SetAsBox(PixelToMeter(rigidBodySize.x / 2), PixelToMeter(rigidBodySize.y / 2));
 
-    b2FixtureDef fixtureDef;
-    fixtureDef.shape = &shape;
-    fixtureDef.density = 1.0f;
+    b2FixtureDef bodyFixtureDef;
+    bodyFixtureDef.shape = &shape;
+    bodyFixtureDef.density = 1.0f;
+    bodyFixtureDef.userData = const_cast<void*>(static_cast<const void*>(&fixtureTypes::bodyBox));
 
     BodyPtr body( GetPhysicWorld()->CreateBody(&bodyDef) );
-    body->CreateFixture(&fixtureDef);
+    body->CreateFixture(&bodyFixtureDef);
+
+    shape.SetAsBox(PixelToMeter(rigidBodySize.x / 3),
+                   PixelToMeter(10.0f), b2Vec2{0.0f, 1.45f}, 0);
+
+    b2FixtureDef footSensorDef;
+    footSensorDef.shape = &shape;
+    footSensorDef.isSensor = true;
+    footSensorDef.userData = const_cast<void*>(static_cast<const void*>(&fixtureTypes::footSensor));
+    body->CreateFixture(&footSensorDef);
+
+    shape.SetAsBox(PixelToMeter(rigidBodySize.x / 2),
+                   PixelToMeter(5.0f), b2Vec2{0.0f, -1.3f}, 0);
+    b2FixtureDef headSensorDef;
+    headSensorDef.shape = &shape;
+    headSensorDef.isSensor = true;
+    headSensorDef.userData = const_cast<void*>(static_cast<const void*>(&fixtureTypes::headSensor));
+    body->CreateFixture(&headSensorDef);
 
     Animator animator = Application::Get().animatorFactory->Create(name);
 
@@ -140,6 +159,7 @@ BodyPtr World::createTileBox(sf::FloatRect rect)
 
     b2FixtureDef fixtureDef;
     fixtureDef.shape = &shape;
+    fixtureDef.userData = const_cast<void*>(static_cast<const void*>(&fixtureTypes::bodyBox));
 
     BodyPtr body( GetPhysicWorld()->CreateBody(&bodyDef) );
     body->CreateFixture(&fixtureDef);

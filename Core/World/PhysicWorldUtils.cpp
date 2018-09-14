@@ -22,4 +22,10 @@ void BodyDeleter::operator()(b2Body *body)
     Application::Get().world->GetPhysicWorld()->DestroyBody(body);
 }
 
+//int32_t fixtureTypes::GetFreeFixtureId()
+//{
+//    static int32_t freeId = 0;
+//    return freeId++;
+//}
+
 } // end of core

@@ -8,6 +8,8 @@ namespace core
     class Resources;
     class AnimatorFactory;
     class World;
+    class CollisionInfo;
+    class CollisionListener;
 }
 
 class Application
@@ -27,7 +29,9 @@ public:
     std::unique_ptr<core::Resources> resources;
     std::unique_ptr<core::AnimatorFactory> animatorFactory;
     std::unique_ptr<core::World> world;
+    std::unique_ptr<core::CollisionInfo> collisionInfo;
 private:
+    std::unique_ptr<core::CollisionListener> m_collisionListener;
     Application() = default;
     ~Application() = default;
 };

@@ -7,10 +7,14 @@
 
 namespace core
 {
-
-Entity::~Entity()
+namespace storage
 {
+    static uint64_t freeInternalId = 0;
+}
 
+Entity::Entity()
+    : m_internalId(storage::freeInternalId++)
+{
 }
 
 void Entity::SetTexture(const std::string& holder, const std::string &id)
@@ -28,6 +32,7 @@ void Entity::SetSize(const sf::Vector2f &size)
 void Entity::SetBody(BodyPtr&& body)
 {
     m_rigidBody = std::move(body);
+    m_rigidBody->SetUserData(static_cast<void*>(&m_internalId));
     updateSprite();
 }
 
@@ -47,9 +52,9 @@ void Entity::ApplyForce(sf::Vector2f force)
     m_velocity += force;
 }
 
-sf::Sprite &Entity::GetSprite()
+sf::Vector2f Entity::GetVelocity() const
 {
-    return m_sprite;
+    return m_velocity;
 }
 
 void Entity::Update()
@@ -68,6 +73,16 @@ void Entity::Update()
 void Entity::Draw(sf::RenderWindow &window) const
 {
     window.draw(m_sprite);
+}
+
+sf::Sprite &Entity::GetSprite()
+{
+    return m_sprite;
+}
+
+BodyPtr& Entity::GetBody()
+{
+    return m_rigidBody;
 }
 
 void Entity::updateSprite()

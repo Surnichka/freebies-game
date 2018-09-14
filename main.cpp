@@ -21,7 +21,9 @@ int main()
     core::PhysicDebugDraw b2DebugDraw(window);
     app.world->GetPhysicWorld()->SetDebugDraw(&b2DebugDraw);
 
-    auto character = app.world->CreateCharacter("knight", {100, 100, 100, 100}, {60, 80});
+
+    auto character = app.world->CreateCharacter("knight", {120, 100, 100, 100}, {60, 80});
+
 //    character.SetController(Player::One);
 //    character.SetController(Player::Two);
 
@@ -48,7 +50,7 @@ int main()
         }
         app.frameTime = std::chrono::milliseconds(15);
 
-        character.ApplyForce({0.0f, 10.0f});
+        character.ApplyForce({0.0f, 15.0f});
         character.Update();
         app.world->Update();
 

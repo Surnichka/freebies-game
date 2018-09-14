@@ -18,9 +18,12 @@ public:
     void Update() override;
     void Draw(sf::RenderWindow& window) const override;
 private:
-    void moveCharacter();
+    void move();
+    void jump();
+
     Animator m_animator;
     fsm::StateMachine m_stateMachine;
+    Timer m_jumpTimer;
 };
 
 } //end of core

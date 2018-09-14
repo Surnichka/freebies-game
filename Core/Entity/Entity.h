@@ -12,14 +12,14 @@ namespace core
 class Entity
 {
 public:
-    Entity() = default;
-    virtual ~Entity();
-
-    Entity(const Entity&) = delete;
-    Entity& operator=(const Entity&) = delete;
+    Entity();
+    virtual ~Entity() = default;
 
     Entity(Entity&&) = default;
     Entity& operator=(Entity&&) = default;
+
+    Entity(const Entity&) = delete;
+    Entity& operator=(const Entity&) = delete;
 
     void SetTexture(const std::string& holder, const std::string& id);
 
@@ -28,10 +28,14 @@ public:
     void SetFlip(bool xFlip, bool yFlip = false);
 
     void ApplyForce(sf::Vector2f force);
-    sf::Sprite& GetSprite();
+    sf::Vector2f GetVelocity() const;
 
     virtual void Update();
     virtual void Draw(sf::RenderWindow& window) const;
+
+    sf::Sprite& GetSprite();
+    BodyPtr& GetBody();
+
 private:
     void updateSprite();
 
@@ -41,6 +45,8 @@ private:
     sf::Sprite m_sprite;
     sf::Vector2f m_size;
     std::pair<bool, bool> m_flip = {false, false};
+
+    uint64_t m_internalId = 0;
 };
 
 }
