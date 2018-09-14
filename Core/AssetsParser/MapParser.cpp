@@ -32,11 +32,31 @@ namespace experimental
         "TOOOOOOOOOOOOOOOOOOT",
         "TTTTTTTTTTTTTTTTTTTT",
     };
+
+    const std::vector<std::string> map2 =
+    {
+        "OOOOOOOOOOOOOOOOOOOO",
+        "TOOOOOOOOOOOOOOOOOOT",
+        "TOOOOOOOOOOOOOOOOOOT",
+        "TOOOTTTTTTTTTTTTTTTT",
+        "TTOOOOOOOOOOOOOOOOOT",
+        "TTTOOOOOOOOOOOOOOOOT",
+        "TTTTTTTTTTTTTTTTOOOT",
+        "TOOOOOOOOOOOOOOOOOTT",
+        "TOOOOOOOOOOOOOOOOTTT",
+        "TOOOTTTTTTTTTTTTTTTT",
+        "TTOOOOOOOOOOOOOOOOOT",
+        "TTTOOOOOOOOOOOOOOOOT",
+        "TTTTTTTTTTTTTTTTOOOT",
+        "TOOOOOOOOOOOOOOOOOTT",
+        "TOOOOOOOOOOOOOOOOTTT",
+        "TTTTTTTTTTTTTTTTTTTT",
+    };
 }
 
 void MapParser::Parse()
 {
-    for(const auto& mapRow : experimental::map)
+    for(const auto& mapRow : experimental::map2)
     {
         MapRow row;
         for(auto id : mapRow)

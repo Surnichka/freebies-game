@@ -1,27 +1,30 @@
 #include "CollisionInfo.h"
 #include "../Entity/Entity.h"
+#include <iostream>
 
 namespace core
 {
 
-bool CollisionInfo::IsFootSensorActive(Entity &entity)
-{
-   uint64_t internalId = (*static_cast<uint64_t*>(entity.GetBody()->GetUserData()));
-   auto iter = collisionTable.find(internalId);
-   if( iter != collisionTable.end() )
-   {
-       return iter->second.isFootSensorActive;
-   }
-   return false;
-}
-
-bool CollisionInfo::IsHeatSensorActive(Entity &entity)
+bool CollisionInfo::IsSensorActive(const std::string &sensor, Entity &entity)
 {
     uint64_t internalId = (*static_cast<uint64_t*>(entity.GetBody()->GetUserData()));
     auto iter = collisionTable.find(internalId);
     if( iter != collisionTable.end() )
     {
-        return iter->second.isHeadSensorActive;
+        auto sensorIter = iter->second.find(sensor);
+        if( sensorIter != iter->second.end() )
+        {
+            if(sensor == "head")
+            {
+                std::cout << "Entity: " << internalId << "|Sensor: " <<  sensorIter->first
+                          << "|Count: " << sensorIter->second << std::endl;
+            }
+            return (sensorIter->second != 0);
+        }
+        else
+        {
+            return false;
+        }
     }
     return false;
 }

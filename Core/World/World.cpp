@@ -61,17 +61,16 @@ void World::Init()
                 continue;
             }
 
-            mapResources->Aquire("box", texturePath);
-
             m_entities.emplace_back(Entity());
-            m_entities.back().SetSize({tileWidth, tileHeight});
 
+            mapResources->Aquire("box", texturePath);
+            m_entities.back().SetSize({tileWidth, tileHeight});
             auto tileBody = createTileBox({posInWorld.x + tileWidth / 2,
                                            posInWorld.y + tileHeight / 2,
                                            tileWidth,
                                            tileHeight});
 
-            m_entities.back().SetBody( std::move(tileBody) );
+            m_entities.back().SetBody(std::move(tileBody));
             m_entities.back().SetTexture("map", "box");
         }
         posInWorld.x = 0;
@@ -130,7 +129,7 @@ Character World::CreateCharacter(const std::string &name,
     footSensorDef.userData = const_cast<void*>(static_cast<const void*>(&fixtureTypes::footSensor));
     body->CreateFixture(&footSensorDef);
 
-    shape.SetAsBox(PixelToMeter(rigidBodySize.x / 2),
+    shape.SetAsBox(PixelToMeter(rigidBodySize.x / 3),
                    PixelToMeter(5.0f), b2Vec2{0.0f, -1.3f}, 0);
     b2FixtureDef headSensorDef;
     headSensorDef.shape = &shape;

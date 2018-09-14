@@ -19,7 +19,6 @@ void Character::Init(Animator &&animator)
     nullptr, //ConditionToEnter
     [this](fsm::StateMachine&) //OnEnter
     {
-//        m_animator.RunAnimation(FadeBy::Create(10), 1000ms);
         m_animator.Loop("idle", 500ms);
     },
     nullptr, //OnUpdate
@@ -27,25 +26,30 @@ void Character::Init(Animator &&animator)
 ////////////////////////////////////////////////////////////////////////////
 
     m_stateMachine.AddState("attack",
-    [](fsm::StateMachine&) //ConditionToEnter
+    [this](fsm::StateMachine&) //ConditionToEnter
     {
-        return sf::Keyboard::isKeyPressed(sf::Keyboard::K);
+        return m_controller.requestAttack((*this));
     },
     [this](fsm::StateMachine& sm) //OnEnter
     {
         m_animator.Play("attack", 300ms);
         sm.RequestState("idle", 300ms);
     },
-    nullptr, //OnUpdate
+    [this](fsm::StateMachine&) //OnUpdate
+    {
+        if(m_jumpTimer.IsRunning()) //Can move while attacking only while jumping
+        {
+            move(12.0f);
+        }
+    },
     {"idle"}); //TransitionList
 
 ////////////////////////////////////////////////////////////////////////////
 
     const auto& runState = m_stateMachine.AddState("run",
-    [](fsm::StateMachine&) //ConditionToEnter
+    [this](fsm::StateMachine&) //ConditionToEnter
     {
-        return sf::Keyboard::isKeyPressed(sf::Keyboard::A) ||
-               sf::Keyboard::isKeyPressed(sf::Keyboard::D);
+        return m_controller.requestMoveLeft((*this)) || m_controller.requestMoveRight((*this));
     },
     [this](fsm::StateMachine&) //OnEnter
     {
@@ -53,7 +57,7 @@ void Character::Init(Animator &&animator)
     },
     [this](fsm::StateMachine&)
     {
-        move();
+        move(10.0f);
     },
     {"idle", "jump", "attack"}); //TransitionList
     runState->isDynamic = true;
@@ -62,28 +66,26 @@ void Character::Init(Animator &&animator)
     m_stateMachine.AddState("jump",
     [this](fsm::StateMachine&) //ConditionToEnter
     {
-        auto isOnGround = Application::Get().collisionInfo->IsFootSensorActive((*this));
-        auto isJumpKeyPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::W);
+        auto isOnGround = Application::Get().collisionInfo->IsSensorActive("foot", (*this));
+        auto isJumpKeyPressed = m_controller.requestJump((*this));
 
         return isOnGround && isJumpKeyPressed;
     },
-    [this](fsm::StateMachine& sm) //OnEnter
+    [this](fsm::StateMachine&) //OnEnter
     {
         jump();
         m_animator.Play("jump", 500ms);
     },
     [this](fsm::StateMachine& sm) //OnUpdate
     {
-        move();
-        auto isHeadHitted = Application::Get().collisionInfo->IsHeatSensorActive((*this));
-        if( isHeadHitted )
+        move(12.0f);
+
+        auto isHeadHitted = Application::Get().collisionInfo->IsSensorActive("head", (*this));
+        auto isOnGround = Application::Get().collisionInfo->IsSensorActive("foot", (*this));
+
+        if( isOnGround || isHeadHitted)
         {
             m_jumpTimer.Stop();
-        }
-
-        auto isOnGround = Application::Get().collisionInfo->IsFootSensorActive((*this));
-        if( isOnGround )
-        {
             sm.RequestState("idle");
         }
     },
@@ -91,9 +93,15 @@ void Character::Init(Animator &&animator)
     ////////////////////////////////////////////////////////////////////////////
 }
 
+void Character::SetController(const CharacterController &controller)
+{
+    m_controller = controller;
+}
+
 void Character::Update()
 {
     m_jumpTimer.Update();
+
     m_stateMachine.Update();
     Entity::Update();
     m_animator.Update(*this);
@@ -106,27 +114,26 @@ void Character::Draw(sf::RenderWindow &window) const
 
 void Character::jump()
 {
-    sf::Vector2f jumpVelocity = {0.0f, -30.0f};
+    sf::Vector2f jumpVelocity = {0.0f, -33.0f};
     std::chrono::milliseconds duration = 200ms;
 
     m_jumpTimer.Setup(Timer::Config(duration));
     m_jumpTimer.OnTick([this, jumpVelocity = std::move(jumpVelocity)]() mutable
     {
         Entity::ApplyForce(jumpVelocity);
-        jumpVelocity.y = std::min(jumpVelocity.y + 0.5f, -20.0f);
+        jumpVelocity.y = std::min(jumpVelocity.y + 1.0f, -15.0f);
     });
     m_jumpTimer.Start();
 }
 
-void Character::move()
+void Character::move(float speed)
 {
-    float speed = 10.0f;
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+    if(m_controller.requestMoveLeft((*this)))
     {
         Entity::SetFlip(true);
         Entity::ApplyForce({-speed, 0.0f});
     }
-    else if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+    else if(m_controller.requestMoveRight((*this)))
     {
         Entity::SetFlip(false);
         Entity::ApplyForce({speed, 0.0f});

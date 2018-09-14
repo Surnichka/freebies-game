@@ -19,7 +19,8 @@ namespace fixtureTypes
 {
     const int32_t bodyBox = 0;
     const int32_t footSensor = 1;
-    const int32_t headSensor = 1;
+    const int32_t headSensor = 2;
+    const int32_t treeSensor = 3;
 };
 
 } //end of core

@@ -7,17 +7,10 @@ namespace core
 class Entity;
 struct CollisionInfo
 {
-    struct Info
-    {
-        bool isFootSensorActive = false;
-        bool isHeadSensorActive = false;
-    };
-    std::unordered_map<uint64_t, Info> collisionTable;
+    using InfoMap = std::unordered_map<std::string, int32_t>;
+    std::unordered_map<uint64_t, InfoMap> collisionTable;
 
-    bool IsFootSensorActive(Entity& entity);
-    bool IsHeatSensorActive(Entity& entity);
-
-private:
+    bool IsSensorActive(const std::string& sensor, Entity& entity);
 };
 
 } //end of core

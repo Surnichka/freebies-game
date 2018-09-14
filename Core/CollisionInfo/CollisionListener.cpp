@@ -42,48 +42,35 @@ namespace helper
         }
     }
 
-
-    void CheckFootSensor(b2Contact* contact, bool contactTag)
+    void CheckForSensors(b2Contact* contact,
+                         const std::string& sensorName,
+                         int32_t fixtureType,
+                         int32_t sensorModifier)
     {
         auto& colInfo = Application::Get().collisionInfo;
-        if( fixtureTypes::footSensor == GetFixtureId(contact, Fixture::A) )
+        if( fixtureType == GetFixtureId(contact, Fixture::A) )
         {
             auto id = GetBodyId(contact, Fixture::A);
-            colInfo->collisionTable[id].isFootSensorActive = contactTag;
+            colInfo->collisionTable[id][sensorName] += sensorModifier;
         }
-        else if( fixtureTypes::footSensor == GetFixtureId(contact, Fixture::B) )
+        else if( fixtureType == GetFixtureId(contact, Fixture::B) )
         {
             auto id = GetBodyId(contact, Fixture::B);
-            colInfo->collisionTable[id].isFootSensorActive = contactTag;
-        }
-    }
-
-    void CheckHeadSensor(b2Contact* contact, bool contactTag)
-    {
-        auto& colInfo = Application::Get().collisionInfo;
-        if( fixtureTypes::headSensor == GetFixtureId(contact, Fixture::A) )
-        {
-            auto id = GetBodyId(contact, Fixture::A);
-            colInfo->collisionTable[id].isHeadSensorActive = contactTag;
-        }
-        else if( fixtureTypes::headSensor == GetFixtureId(contact, Fixture::B) )
-        {
-            auto id = GetBodyId(contact, Fixture::B);
-            colInfo->collisionTable[id].isHeadSensorActive = contactTag;
+            colInfo->collisionTable[id][sensorName] += sensorModifier;
         }
     }
 }
 
 void CollisionListener::BeginContact(b2Contact *contact)
 {
-    helper::CheckFootSensor(contact, true);
-    helper::CheckHeadSensor(contact, true);
+    helper::CheckForSensors(contact, "head", fixtureTypes::headSensor, (1));
+    helper::CheckForSensors(contact, "foot", fixtureTypes::footSensor, (1));
 }
 
 void CollisionListener::EndContact(b2Contact *contact)
 {
-    helper::CheckFootSensor(contact, false);
-    helper::CheckHeadSensor(contact, false);
+    helper::CheckForSensors(contact, "head", fixtureTypes::headSensor, (-1));
+    helper::CheckForSensors(contact, "foot", fixtureTypes::footSensor, (-1));
 }
 
 } //end of core

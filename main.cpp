@@ -2,6 +2,7 @@
 #include "SFML/Window/Event.hpp"
 
 #include "Core/Application/Application.h"
+#include "Core/CharacterController/CharacterController.h"
 
 #include "Core/World/World.h"
 #include <Box2D/Box2D.h>
@@ -21,14 +22,11 @@ int main()
     core::PhysicDebugDraw b2DebugDraw(window);
     app.world->GetPhysicWorld()->SetDebugDraw(&b2DebugDraw);
 
-
     auto character = app.world->CreateCharacter("knight", {120, 100, 100, 100}, {60, 80});
+    character.SetController(core::controllers::Player_One());
 
-//    character.SetController(Player::One);
-//    character.SetController(Player::Two);
-
-//    character.SetController(AI::Patrul);
-//    character.SetController(AI::Agressive);
+//    auto character2 = app.world->CreateCharacter("cute_girl", {120, 100, 100, 100}, {60, 80});
+//    character2.SetController(core::controllers::PlayerTwo());
 
     while (window.isOpen())
     {
@@ -52,10 +50,15 @@ int main()
 
         character.ApplyForce({0.0f, 15.0f});
         character.Update();
+
+//        character2.ApplyForce ({0.0f, 15.0f});
+//        character2.Update();
+
         app.world->Update();
 
         app.world->Draw(window);
         character.Draw(window);
+//        character2.Draw(window);
 
         app.world->GetPhysicWorld()->DrawDebugData();
 
